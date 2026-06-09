@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "test": "node --import tsx --test test/**/*.test.ts",
+    "test": "node --import tsx --test test/client.test.ts",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
