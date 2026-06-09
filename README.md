@@ -1,6 +1,15 @@
-# SimplySend Node.js SDK
+<p align="center">
+  <a href="https://simplysend.email">
+    <img src="https://simplysend.email/sse-logo-blue-256x.png" alt="SimplySend Logo" width="100" height="100" />
+  </a>
+</p>
 
-Official Node.js SDK for SimplySend - a premium, high-performance transactional and marketing email sending and management platform.
+<h1 align="center">SimplySend Node.js SDK</h1>
+
+<p align="center">
+  Official Node.js SDK for SimplySend - a premium, high-performance transactional and marketing email sending and management platform.
+</p>
+
 
 <!-- [![npm version](https://img.shields.io/npm/v/simplysend.svg)](https://www.npmjs.com/package/simplysend) (Uncomment once published to npm) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
