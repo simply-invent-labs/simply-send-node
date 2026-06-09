@@ -2,13 +2,13 @@
 
 Official Node.js SDK for SimplySend - a premium, high-performance transactional and marketing email sending and management platform.
 
-<!-- [![npm version](https://img.shields.io/npm/v/@simplysend/node.svg)](https://www.npmjs.com/package/@simplysend/node) (Uncomment once published to npm) -->
+<!-- [![npm version](https://img.shields.io/npm/v/simplysend.svg)](https://www.npmjs.com/package/simplysend) (Uncomment once published to npm) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
 
 - **Strict Separation of Concerns**: Exposes three dedicated client classes for Transactional API, Marketing API, and Web Setup API.
-- **Lightweight & Dependency-free**: Uses native `fetch` (requires Node.js 18+). No heavy dependencies.
+- **Lightweight & Dependency-free**: Uses native `fetch` (requires Node.js 22+). No heavy dependencies.
 - **Dual module support**: Pre-built ESM (ES Modules) and CJS (CommonJS) formats.
 - **Strongly Typed**: Full TypeScript support with detailed interfaces.
 - **Smart Attachments**: Pass raw Node.js `Buffer` objects, and the SDK will automatically base64-encode them for you.
@@ -16,7 +16,7 @@ Official Node.js SDK for SimplySend - a premium, high-performance transactional 
 ## Installation
 
 ```bash
-npm install @simplysend/node
+npm install simplysend
 ```
 
 ---
@@ -29,7 +29,7 @@ To connect to SimplySend, you will initialize the specialized client class corre
 Used to send transactional emails (OTPs, receipts, alerts).
 
 ```typescript
-import { SimplySendTransactionalClient } from '@simplysend/node';
+import { SimplySendTransactionalClient } from 'simplysend';
 
 const client = new SimplySendTransactionalClient({
   accountId: 'ss_acc_123456',
@@ -41,7 +41,7 @@ const client = new SimplySendTransactionalClient({
 Used to send newsletters or marketing campaigns.
 
 ```typescript
-import { SimplySendMarketingClient } from '@simplysend/node';
+import { SimplySendMarketingClient } from 'simplysend';
 
 const client = new SimplySendMarketingClient({
   accountId: 'ss_acc_123456',
@@ -53,7 +53,7 @@ const client = new SimplySendMarketingClient({
 Used for resource management (domains, templates, subscribers, webhooks).
 
 ```typescript
-import { SimplySendWebSetupClient } from '@simplysend/node';
+import { SimplySendWebSetupClient } from 'simplysend';
 
 const client = new SimplySendWebSetupClient({
   accountId: 'ss_acc_123456',
@@ -68,7 +68,7 @@ const client = new SimplySendWebSetupClient({
 ### 1. Send a Transactional Email
 
 ```typescript
-import { SimplySendTransactionalClient } from '@simplysend/node';
+import { SimplySendTransactionalClient } from 'simplysend';
 
 const client = new SimplySendTransactionalClient({
   accountId: 'ss_acc_123',
@@ -102,7 +102,7 @@ try {
 ### 2. Send a Marketing Email
 
 ```typescript
-import { SimplySendMarketingClient } from '@simplysend/node';
+import { SimplySendMarketingClient } from 'simplysend';
 
 const client = new SimplySendMarketingClient({
   accountId: 'ss_acc_123',
@@ -129,7 +129,7 @@ try {
 ### 3. Manage Web Setup Resources (Domains, Templates, Subscribers)
 
 ```typescript
-import { SimplySendWebSetupClient } from '@simplysend/node';
+import { SimplySendWebSetupClient } from 'simplysend';
 
 const client = new SimplySendWebSetupClient({
   accountId: 'ss_acc_123',
@@ -188,7 +188,7 @@ When initializing, each client expects exactly its corresponding credentials:
 The SDK exposes descriptive error classes to help you debug integration issues:
 
 ```typescript
-import { SimplySendClient, SimplySendHttpError, SimplySendValidationError } from '@simplysend/node';
+import { SimplySendTransactionalClient, SimplySendHttpError, SimplySendValidationError } from 'simplysend';
 
 try {
   // 1. Instantiation validation (throws locally)

@@ -1,5 +1,5 @@
 {
-  "name": "@simplysend/node",
+  "name": "simplysend",
   "version": "1.0.0",
   "description": "Official Node.js SDK for SimplySend - Send transactional and marketing emails",
   "main": "./dist/index.js",
@@ -39,6 +39,6 @@
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }
