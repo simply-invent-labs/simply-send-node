@@ -1,4 +1,6 @@
-export { SimplySendClient } from './client';
+export { SimplySendTransactionalClient } from './client';
+export { SimplySendMarketingClient } from './client';
+export { SimplySendWebSetupClient } from './client';
 export {
   SimplySendError,
   SimplySendValidationError,

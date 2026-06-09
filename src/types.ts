@@ -1,47 +1,51 @@
 /**
- * Client initialization configuration options.
+ * Configuration for the SimplySend Transactional Client.
  */
-export interface SimplySendConfig {
+export interface SimplySendTransactionalConfig {
   /**
-   * The SimplySend Transactional Email API Key (tapi).
+   * The Account ID. Required.
    */
-  tapiKey?: string;
+  accountId: string;
   /**
-   * The SimplySend Marketing Email API Key (mapi).
+   * The SimplySend Transactional Email API Key (tapi). Required.
    */
-  mapiKey?: string;
+  tapiKey: string;
+}
+
+/**
+ * Configuration for the SimplySend Marketing Client.
+ */
+export interface SimplySendMarketingConfig {
+  /**
+   * The Account ID. Required.
+   */
+  accountId: string;
+  /**
+   * The SimplySend Marketing Email API Key (mapi). Required.
+   */
+  mapiKey: string;
+}
+
+/**
+ * Configuration for the SimplySend Web Setup / Resource Management Client.
+ */
+export interface SimplySendWebSetupConfig {
+  /**
+   * The Account ID. Required.
+   */
+  accountId: string;
   /**
    * The SimplySend Web Setup API Key (wapi) for resource management.
    */
   wapiKey?: string;
   /**
-   * Alias for wapiKey (supporting user typing: wpai).
+   * Alias for wapiKey.
    */
   wpaiKey?: string;
   /**
    * Alias for wapiKey.
    */
   wapiSecret?: string;
-  /**
-   * The Account ID (required for Web Setup API and transactional/marketing sends).
-   */
-  accountId?: string;
-  /**
-   * Transactional Email API base URL override (defaults to https://tapi.simplysend.email).
-   */
-  emailApiUrl?: string;
-  /**
-   * Marketing Email API base URL override (defaults to https://mapi.simplysend.email).
-   */
-  marketingApiUrl?: string;
-  /**
-   * Web Setup API base URL override (defaults to https://wapi.simplysend.email/web-setup).
-   */
-  webSetupApiUrl?: string;
-  /**
-   * Request timeout in milliseconds (defaults to 30000ms).
-   */
-  timeout?: number;
 }
 
 /**
