@@ -2,7 +2,7 @@
 
 Official Node.js SDK for SimplySend - a premium, high-performance transactional and marketing email sending and management platform.
 
-[![npm version](https://img.shields.io/npm/v/@simplysend/node.svg)](https://www.npmjs.com/package/@simplysend/node)
+<!-- [![npm version](https://img.shields.io/npm/v/@simplysend/node.svg)](https://www.npmjs.com/package/@simplysend/node) (Uncomment once published to npm) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Features
