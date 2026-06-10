@@ -34,7 +34,7 @@ npm install simplysend
 
 To connect to SimplySend, you will initialize the specialized client class corresponding to the API features you need. Each constructor requires your **Account ID** and the respective **API Key** (retrieved from the **Settings** page in your SimplySend Dashboard).
 
-### 1. SimplySendTransactionalClient (tapi)
+### 1. SimplySendTransactionalClient
 Used to send transactional emails (OTPs, receipts, alerts).
 
 ```typescript
@@ -42,11 +42,11 @@ import { SimplySendTransactionalClient } from 'simplysend';
 
 const client = new SimplySendTransactionalClient({
   accountId: 'ss_acc_123456',
-  tapiKey: 'ss_tapi_key_abcdef'
+  apiKey: 'ss_api_key_abcdef'
 });
 ```
 
-### 2. SimplySendMarketingClient (mapi)
+### 2. SimplySendMarketingClient
 Used to send newsletters or marketing campaigns.
 
 ```typescript
@@ -54,11 +54,11 @@ import { SimplySendMarketingClient } from 'simplysend';
 
 const client = new SimplySendMarketingClient({
   accountId: 'ss_acc_123456',
-  mapiKey: 'ss_mapi_key_abcdef'
+  apiKey: 'ss_api_key_abcdef'
 });
 ```
 
-### 3. SimplySendWebSetupClient (wapi)
+### 3. SimplySendWebSetupClient
 Used for resource management (domains, templates, subscribers, webhooks).
 
 ```typescript
@@ -66,7 +66,7 @@ import { SimplySendWebSetupClient } from 'simplysend';
 
 const client = new SimplySendWebSetupClient({
   accountId: 'ss_acc_123456',
-  wapiKey: 'ss_wapi_key_abcdef' // wapiSecret and wpaiKey are also accepted as aliases
+  apiKey: 'ss_api_key_abcdef'
 });
 ```
 
@@ -77,15 +77,15 @@ const client = new SimplySendWebSetupClient({
 ### 1. Send a Transactional Email
 
 ```typescript
-import { SimplySendTransactionalClient } from 'simplysend';
+import { SimplySendTransactionalClient, SendTransactionalEmailResponse } from 'simplysend';
 
 const client = new SimplySendTransactionalClient({
   accountId: 'ss_acc_123',
-  tapiKey: 'ss_tapi_key_abc'
+  apiKey: 'ss_api_key_abc'
 });
 
 try {
-  const response = await client.send({
+  const response: SendTransactionalEmailResponse = await client.email.send({
     from: 'welcome@yourverifieddomain.com',
     to: 'customer@example.com',
     subject: 'Welcome!',
@@ -102,7 +102,7 @@ try {
     ]
   });
 
-  console.log('Transactional email sent. Message ID:', response.data.messageId);
+  console.log('Transactional email sent. Message ID:', response.data?.messageId);
 } catch (error) {
   console.error('Failed to send email:', error.message);
 }
@@ -111,15 +111,15 @@ try {
 ### 2. Send a Marketing Email
 
 ```typescript
-import { SimplySendMarketingClient } from 'simplysend';
+import { SimplySendMarketingClient, SendMarketingEmailResponse } from 'simplysend';
 
 const client = new SimplySendMarketingClient({
   accountId: 'ss_acc_123',
-  mapiKey: 'ss_mapi_key_xyz'
+  apiKey: 'ss_api_key_xyz'
 });
 
 try {
-  const response = await client.send({
+  const response: SendMarketingEmailResponse = await client.email.send({
     from: 'newsletter@yourverifieddomain.com',
     to: 'subscriber@example.com',
     subject: 'June Newsletter',
@@ -129,7 +129,7 @@ try {
     enableClickTracking: true,
   });
 
-  console.log('Marketing email sent. Message ID:', response.data.messageId);
+  console.log('Marketing email sent. Message ID:', response.data?.messageId);
 } catch (error) {
   console.error('Failed to send marketing email:', error.message);
 }
@@ -142,7 +142,7 @@ import { SimplySendWebSetupClient } from 'simplysend';
 
 const client = new SimplySendWebSetupClient({
   accountId: 'ss_acc_123',
-  wapiKey: 'ss_wapi_key_789'
+  apiKey: 'ss_api_key_789'
 });
 
 // 1. Add a domain to verify
@@ -166,29 +166,12 @@ console.log('Subscriber added:', subscriber);
 
 ## Client Configurations
 
-When initializing, each client expects exactly its corresponding credentials:
+When initializing, each client class expects exactly the same configuration properties:
 
-### `SimplySendTransactionalClient`
 | Property | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `accountId` | `string` | **Yes** | Your SimplySend Account ID. |
-| `tapiKey` | `string` | **Yes** | API Key dedicated for transactional sends (`tapi.simplysend.email`). |
-
-### `SimplySendMarketingClient`
-| Property | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `accountId` | `string` | **Yes** | Your SimplySend Account ID. |
-| `mapiKey` | `string` | **Yes** | API Key dedicated for marketing sends (`mapi.simplysend.email`). |
-
-### `SimplySendWebSetupClient`
-| Property | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| `accountId` | `string` | **Yes** | Your SimplySend Account ID. |
-| `wapiKey` | `string` | **Yes\*** | API Key for Web Setup resource management. |
-| `wpaiKey` | `string` | **Yes\*** | Alias for `wapiKey`. |
-| `wapiSecret` | `string` | **Yes\*** | Alias for `wapiKey`. |
-
-*\* One of `wapiKey`, `wpaiKey`, or `wapiSecret` is required.*
+| `accountId` | `string` | **Yes** | Your unique SimplySend Account ID, found on the Account page of the SimplySend website (https://app.simplysend.email/account). |
+| `apiKey` | `string` | **Yes** | The SimplySend API Key for authentication, found on the API Keys page of the SimplySend website (https://app.simplysend.email/api-keys). |
 
 ---
 
@@ -203,11 +186,11 @@ try {
   // 1. Instantiation validation (throws locally)
   const client = new SimplySendTransactionalClient({
     accountId: '', // Throws validation error locally
-    tapiKey: 'ss_tapi_key_...'
+    apiKey: 'ss_api_key_...'
   });
 
   // 2. Request parameter validation (throws locally)
-  await client.send({
+  await client.email.send({
     from: 'sender@domain.com',
     to: '', // Throws validation error locally
     subject: 'Hello',

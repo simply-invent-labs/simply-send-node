@@ -13,28 +13,28 @@ import { SimplySendValidationError, SimplySendHttpError } from '../src/errors';
 test('SimplySendTransactionalClient', async (t) => {
   await t.test('should throw error if accountId is missing', () => {
     assert.throws(
-      () => new SimplySendTransactionalClient({ accountId: '', tapiKey: 'key_123' }),
+      () => new SimplySendTransactionalClient({ accountId: '', apiKey: 'key_123' }),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'accountId'
     );
   });
 
-  await t.test('should throw error if tapiKey is missing', () => {
+  await t.test('should throw error if apiKey is missing', () => {
     assert.throws(
-      () => new SimplySendTransactionalClient({ accountId: 'acc_123', tapiKey: '' }),
-      (err: any) => err instanceof SimplySendValidationError && err.field === 'tapiKey'
+      () => new SimplySendTransactionalClient({ accountId: 'acc_123', apiKey: '' }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'apiKey'
     );
   });
 
   await t.test('should validate send payload inputs', async () => {
-    const client = new SimplySendTransactionalClient({ accountId: 'acc_123', tapiKey: 'key_123' });
+    const client = new SimplySendTransactionalClient({ accountId: 'acc_123', apiKey: 'key_123' });
     
     await assert.rejects(
-      () => client.send({ to: '', subject: 'test', html: 'test', from: 'sender@test.com' }),
+      () => client.email.send({ to: '', subject: 'test', html: 'test', from: 'sender@test.com' }),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'to'
     );
 
     await assert.rejects(
-      () => client.send({ to: 'to@test.com', subject: '', html: 'test', from: 'sender@test.com' }),
+      () => client.email.send({ to: 'to@test.com', subject: '', html: 'test', from: 'sender@test.com' }),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'subject'
     );
   });
@@ -42,7 +42,7 @@ test('SimplySendTransactionalClient', async (t) => {
   await t.test('should send transactional email with headers and encode Buffer attachments to base64', async () => {
     const client = new SimplySendTransactionalClient({
       accountId: 'acc_123',
-      tapiKey: 'tapi_key_abc',
+      apiKey: 'tapi_key_abc',
     });
 
     const fetchMock = mock.fn(async (url: any, options: any) => {
@@ -67,7 +67,7 @@ test('SimplySendTransactionalClient', async (t) => {
 
     global.fetch = fetchMock as any;
 
-    const res = await client.send({
+    const res = await client.email.send({
       to: 'recipient@example.com',
       from: 'sender@domain.com',
       subject: 'Test subject',
@@ -93,22 +93,22 @@ test('SimplySendTransactionalClient', async (t) => {
 test('SimplySendMarketingClient', async (t) => {
   await t.test('should throw error if accountId is missing', () => {
     assert.throws(
-      () => new SimplySendMarketingClient({ accountId: '', mapiKey: 'key_123' }),
+      () => new SimplySendMarketingClient({ accountId: '', apiKey: 'key_123' }),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'accountId'
     );
   });
 
-  await t.test('should throw error if mapiKey is missing', () => {
+  await t.test('should throw error if apiKey is missing', () => {
     assert.throws(
-      () => new SimplySendMarketingClient({ accountId: 'acc_123', mapiKey: '' }),
-      (err: any) => err instanceof SimplySendValidationError && err.field === 'mapiKey'
+      () => new SimplySendMarketingClient({ accountId: 'acc_123', apiKey: '' }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'apiKey'
     );
   });
 
   await t.test('should validate subscriptionGroupId', async () => {
-    const client = new SimplySendMarketingClient({ accountId: 'acc_123', mapiKey: 'key_123' });
+    const client = new SimplySendMarketingClient({ accountId: 'acc_123', apiKey: 'key_123' });
     await assert.rejects(
-      () => client.send({
+      () => client.email.send({
         to: 'rec@test.com',
         from: 'sender@domain.com',
         subject: 'sub',
@@ -122,7 +122,7 @@ test('SimplySendMarketingClient', async (t) => {
   await t.test('should send marketing email', async () => {
     const client = new SimplySendMarketingClient({
       accountId: 'acc_123',
-      mapiKey: 'mapi_key_xyz',
+      apiKey: 'mapi_key_xyz',
     });
 
     const fetchMock = mock.fn(async (url: any, options: any) => {
@@ -138,7 +138,7 @@ test('SimplySendMarketingClient', async (t) => {
 
     global.fetch = fetchMock as any;
 
-    const res = await client.send({
+    const res = await client.email.send({
       to: 'rec@test.com',
       from: 'sender@domain.com',
       subject: 'sub',
@@ -158,66 +158,28 @@ test('SimplySendMarketingClient', async (t) => {
 test('SimplySendWebSetupClient', async (t) => {
   await t.test('should throw error if accountId is missing', () => {
     assert.throws(
-      () => new SimplySendWebSetupClient({ accountId: '', wapiKey: 'key_123' }),
+      () => new SimplySendWebSetupClient({ accountId: '', apiKey: 'key_123' }),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'accountId'
     );
   });
 
-  await t.test('should throw error if keys are missing', () => {
+  await t.test('should throw error if apiKey is missing', () => {
     assert.throws(
-      () => new SimplySendWebSetupClient({ accountId: 'acc_123', wapiKey: '' }),
-      (err: any) => err instanceof SimplySendValidationError && err.field === 'wapiKey'
+      () => new SimplySendWebSetupClient({ accountId: 'acc_123', apiKey: '' }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'apiKey'
     );
   });
 
-  await t.test('should authenticate with wapiKey', async () => {
+  await t.test('should authenticate with apiKey', async () => {
     const client = new SimplySendWebSetupClient({
       accountId: 'acc_123',
-      wapiKey: 'wapi_key_789',
+      apiKey: 'wapi_key_789',
     });
 
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/domains');
       assert.strictEqual(options.headers['X-Api-Key'], 'wapi_key_789');
       assert.strictEqual(options.headers['X-Id'], 'acc_123');
-      return new Response(JSON.stringify([]), { status: 200 });
-    });
-
-    global.fetch = fetchMock as any;
-
-    const res = await client.domains.list();
-    assert.deepStrictEqual(res, []);
-    mock.restoreAll();
-  });
-
-  await t.test('should authenticate with wapiSecret', async () => {
-    const client = new SimplySendWebSetupClient({
-      accountId: 'acc_123',
-      wapiSecret: 'wapi_secret_456',
-    });
-
-    const fetchMock = mock.fn(async (url: any, options: any) => {
-      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/domains');
-      assert.strictEqual(options.headers['X-Api-Key'], 'wapi_secret_456');
-      return new Response(JSON.stringify([]), { status: 200 });
-    });
-
-    global.fetch = fetchMock as any;
-
-    const res = await client.domains.list();
-    assert.deepStrictEqual(res, []);
-    mock.restoreAll();
-  });
-
-  await t.test('should authenticate with wpaiKey', async () => {
-    const client = new SimplySendWebSetupClient({
-      accountId: 'acc_123',
-      wpaiKey: 'wpai_key_888',
-    });
-
-    const fetchMock = mock.fn(async (url: any, options: any) => {
-      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/domains');
-      assert.strictEqual(options.headers['X-Api-Key'], 'wpai_key_888');
       return new Response(JSON.stringify([]), { status: 200 });
     });
 
@@ -236,7 +198,7 @@ test('SimplySend Client Error Wrapping', async (t) => {
   await t.test('should wrap non-2xx responses into SimplySendHttpError', async () => {
     const client = new SimplySendWebSetupClient({
       accountId: 'acc_123',
-      wapiKey: 'wapi_key_789',
+      apiKey: 'wapi_key_789',
     });
 
     const fetchMock = mock.fn(async () => {

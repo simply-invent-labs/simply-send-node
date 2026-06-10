@@ -1,6 +1,6 @@
 {
   "name": "simplysend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Official Node.js SDK for SimplySend - Send transactional and marketing emails",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -32,11 +32,11 @@
   "author": "Simply Send Team",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/node": "^25.9.2",
     "ts-node": "^10.9.2",
-    "tsup": "^8.0.1",
+    "tsup": "^8.5.1",
     "tsx": "^4.22.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=22.0.0"
