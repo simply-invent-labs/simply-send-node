@@ -387,6 +387,11 @@ export interface Domain {
    * Verification status of the domain configuration (e.g., 'verified', 'pending'). Optional.
    */
   status?: string;
+
+  /**
+   * The DNS verification records required to verify this domain. Optional.
+   */
+  dnsRecords?: DnsRecord[];
 }
 
 /**
