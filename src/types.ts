@@ -459,9 +459,9 @@ export interface Subscriber {
   firstName?: string;
 
   /**
-   * Optional full name. Optional.
+   * Optional last name. Optional.
    */
-  fullName?: string;
+  lastName?: string;
 
   /**
    * Optional phone number. Optional.
