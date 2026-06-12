@@ -192,7 +192,130 @@ test('SimplySendWebSetupClient', async (t) => {
 });
 
 // ============================================================================
-// 4. HTTP Errors & Wrapping
+// 4. SimplySendWebSetupClient Contacts & Subscribers Tests
+// ============================================================================
+test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
+  const client = new SimplySendWebSetupClient({
+    accountId: 'acc_123',
+    apiKey: 'wapi_key_789',
+  });
+
+  await t.test('contacts.list() should invoke GET /web-setup/contacts', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts?limit=10&search=john');
+      assert.strictEqual(options.method, 'GET');
+      return new Response(JSON.stringify({ success: true, data: { contacts: [], count: 0 } }), { status: 200 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.list({ limit: 10, search: 'john' });
+    assert.strictEqual(res.success, true);
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.get() should throw validation error if identifier does not contain colon', async () => {
+    await assert.rejects(
+      () => client.contacts.get('user@test.com'),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'contactIdentifier'
+    );
+  });
+
+  await t.test('contacts.get() should invoke GET /web-setup/contacts/{contactIdentifier}', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(options.method, 'GET');
+      return new Response(JSON.stringify({ success: true, data: { contact: { email: 'user@test.com' }, memberships: [] } }), { status: 200 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.get('email:4832981775432a1383848b8137350438');
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.contact.email, 'user@test.com');
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.create() should invoke POST /web-setup/contacts', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts');
+      assert.strictEqual(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.email, 'user@test.com');
+      assert.strictEqual(body.firstName, 'John');
+      return new Response(JSON.stringify({ success: true, data: { contact: { email: 'user@test.com', firstName: 'John' } } }), { status: 201 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.create({ email: 'user@test.com', firstName: 'John' });
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.contact.firstName, 'John');
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.createOrUpdate() should invoke PUT /web-setup/contacts/{contactIdentifier}', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(options.method, 'PUT');
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.firstName, 'John');
+      return new Response(JSON.stringify({ success: true, data: { contact: { email: 'user@test.com', firstName: 'John' } } }), { status: 200 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.createOrUpdate('email:4832981775432a1383848b8137350438', { firstName: 'John' });
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.contact.firstName, 'John');
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.delete() should invoke DELETE /web-setup/contacts/{contactIdentifier}', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(options.method, 'DELETE');
+      return new Response(JSON.stringify({ success: true, data: { message: 'Deleted' } }), { status: 200 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.delete('email:4832981775432a1383848b8137350438');
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.message, 'Deleted');
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.createGroup() should invoke POST /web-setup/contacts/subscription-groups', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/subscription-groups');
+      assert.strictEqual(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.name, 'Newsletter');
+      return new Response(JSON.stringify({ success: true, data: { group: { name: 'Newsletter', groupId: 'list_123' } } }), { status: 201 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.createGroup({ name: 'Newsletter' });
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.group.groupId, 'list_123');
+    mock.restoreAll();
+  });
+
+  await t.test('contacts.addSubscriber() should invoke POST /web-setup/contacts/subscription-groups/{id}/subscriptions', async () => {
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/subscription-groups/list_123/subscriptions');
+      assert.strictEqual(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.email, 'sub@test.com');
+      return new Response(JSON.stringify({ success: true, data: { message: 'Added', subscriber: { email: 'sub@test.com' } } }), { status: 201 });
+    });
+    global.fetch = fetchMock as any;
+
+    const res = await client.contacts.addSubscriber('list_123', { email: 'sub@test.com', isActive: true });
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data.subscriber.email, 'sub@test.com');
+    mock.restoreAll();
+  });
+});
+
+// ============================================================================
+// 5. HTTP Errors & Wrapping
 // ============================================================================
 test('SimplySend Client Error Wrapping', async (t) => {
   await t.test('should wrap non-2xx responses into SimplySendHttpError', async () => {

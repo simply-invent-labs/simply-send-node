@@ -11,6 +11,12 @@ export interface SimplySendTransactionalConfig {
    * The SimplySend API Key for transactional sending (tapi), found on the API Keys page of the SimplySend website (https://app.simplysend.email/api-keys). Required.
    */
   apiKey: string;
+
+  /**
+   * @internal
+   * Optional custom base URL (e.g. for local sending testing; used by Simply Send dev Team only). Optional.
+   */
+  baseUrl?: string;
 }
 
 /**
@@ -26,6 +32,12 @@ export interface SimplySendMarketingConfig {
    * The SimplySend API Key for marketing sending (mapi), found on the API Keys page of the SimplySend website (https://app.simplysend.email/api-keys). Required.
    */
   apiKey: string;
+
+  /**
+   * @internal
+   * Optional custom base URL (e.g. for local sending testing; used by Simply Send dev Team only). Optional.
+   */
+  baseUrl?: string;
 }
 
 /**
@@ -41,6 +53,12 @@ export interface SimplySendWebSetupConfig {
    * The SimplySend API Key for resource setup management (wapi), found on the API Keys page of the SimplySend website (https://app.simplysend.email/api-keys). Required.
    */
   apiKey: string;
+
+  /**
+   * @internal
+   * Optional custom base URL (e.g. for local resource configuration testing; used by Simply Send dev Team only). Optional.
+   */
+  baseUrl?: string;
 }
 
 /**
@@ -429,9 +447,14 @@ export interface DnsRecord {
  */
 export interface SubscriptionGroup {
   /**
-   * Unique subscription group identifier. Optional.
+   * Unique subscription group identifier.
    */
   groupId?: string;
+
+  /**
+   * Legacy contact list identifier.
+   */
+  contactListId?: string;
 
   /**
    * Name of the group. Required.
@@ -445,48 +468,192 @@ export interface SubscriptionGroup {
 }
 
 /**
- * Represents an active contact / subscriber.
+ * Represents a global directory contact.
  */
-export interface Subscriber {
-  /**
-   * Email address of the subscriber. Required.
-   */
-  email: string;
-
-  /**
-   * Optional first name. Optional.
-   */
+export interface Contact {
+  contactIdentifier?: string;
+  email?: string;
   firstName?: string;
-
-  /**
-   * Optional last name. Optional.
-   */
   lastName?: string;
-
-  /**
-   * Optional phone number. Optional.
-   */
   phone?: string;
-
-  /**
-   * How consent was obtained (e.g., 'single_opt_in', 'double_opt_in'). Optional.
-   */
-  consentMethod?: string;
-
-  /**
-   * Documented proof of consent (e.g. checkbox state, IP, form URL). Optional.
-   */
+  globalStatus?: 'active' | 'unsubscribed' | 'bounced' | 'complained' | 'suppressed';
+  consentMethod?: 'double_opt_in' | 'single_opt_in' | 'imported' | 'web_form' | 'implicit_api' | 'other' | string;
   consentProof?: string;
-
-  /**
-   * Active status of the subscriber. Optional.
-   */
-  isActive?: boolean;
-
-  /**
-   * Custom key-value metadata store. Optional.
-   */
+  consentMethodOther?: string;
+  consentIpAddress?: string;
+  consentUserAgent?: string;
+  consentTimestamp?: string;
+  source?: string;
+  addedBy?: string;
   metadata?: Record<string, any>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Represents the request payload to subscribe or update a contact list membership.
+ */
+export interface SubscriberRequest {
+  contactIdentifier?: string;
+  email?: string;
+  phone?: string;
+  isActive?: boolean;
+  consentMethod?: 'double_opt_in' | 'single_opt_in' | 'imported' | 'web_form' | 'implicit_api' | 'other' | string;
+  consentProof?: string;
+  consentMethodOther?: string;
+  consentIpAddress?: string;
+  consentUserAgent?: string;
+  source?: string;
+}
+
+/**
+ * Represents subscriber membership details, merged with contact details.
+ */
+export interface SubscriberResponse {
+  contactIdentifier?: string;
+  email?: string;
+  groupId: string;
+  userId: string;
+  isActive: boolean;
+  joinedAt: string;
+  source: string;
+  consentMethod: string;
+  consentProof: string;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  globalStatus: string;
+  metadata: Record<string, any>;
+  subscriptionId: string;
+}
+
+// Wrapper responses
+export interface ListContactsResponse {
+  success: boolean;
+  data: {
+    contacts: Contact[];
+    count: number;
+    nextKey?: string;
+  };
+}
+
+export interface GetContactResponse {
+  success: boolean;
+  data: {
+    contact: Contact;
+    memberships: Array<{
+      groupId: string;
+      joinedAt: string;
+      isActive: boolean;
+      source: string;
+    }>;
+  };
+}
+
+export interface UpsertContactResponse {
+  success: boolean;
+  data: {
+    contact: Contact;
+  };
+}
+
+export interface DeleteContactResponse {
+  success: boolean;
+  data: {
+    message: string;
+  };
+}
+
+export interface ListSubscriptionGroupsResponse {
+  success: boolean;
+  data: {
+    groups: SubscriptionGroup[];
+    count: number;
+    nextKey?: string;
+  };
+}
+
+export interface GetSubscriptionGroupResponse {
+  success: boolean;
+  data: {
+    group: SubscriptionGroup & {
+      userId: string;
+      isActive: boolean;
+      totalSubscribers: number;
+      activeSubscribers: number;
+      createdAt: string;
+      updatedAt: string;
+      importStatus: string | null;
+      isDefault: boolean;
+      isSystem: boolean;
+      tags?: string[];
+      allowedTemplateIds?: string[];
+      unsubscribeTemplateId?: string;
+      reportAbuseTemplateId?: string;
+      companyAddressTemplateId?: string;
+    };
+  };
+}
+
+export interface CreateSubscriptionGroupResponse {
+  success: boolean;
+  data: {
+    group: SubscriptionGroup & {
+      groupId: string;
+      userId: string;
+      createdAt: string;
+      updatedAt: string;
+      isActive: boolean;
+    };
+  };
+}
+
+export interface UpdateSubscriptionGroupResponse {
+  success: boolean;
+  data: {
+    group: SubscriptionGroup;
+  };
+}
+
+export interface DeleteSubscriptionGroupResponse {
+  success: boolean;
+  data: {
+    message: string;
+  };
+}
+
+export interface ListSubscribersResponse {
+  success: boolean;
+  data: {
+    subscribers: SubscriberResponse[];
+    count: number;
+    nextKey?: string;
+  };
+}
+
+export interface AddSubscriberResponse {
+  success: boolean;
+  data: {
+    message: string;
+    subscriber: {
+      groupId: string;
+      contactIdentifier?: string;
+      email?: string;
+      phone?: string;
+      userId: string;
+      isActive: boolean;
+      joinedAt: string;
+      source: string;
+      consentMethod: string;
+    };
+  };
+}
+
+export interface DeleteSubscriberResponse {
+  success: boolean;
+  data: {
+    message: string;
+  };
 }
 
 /**

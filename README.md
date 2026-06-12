@@ -135,7 +135,7 @@ try {
 }
 ```
 
-### 3. Manage Web Setup Resources (Domains, Templates, Subscribers)
+### 3. Manage Web Setup Resources (Domains, Contacts, Subscription Groups, Subscribers)
 
 ```typescript
 import { SimplySendWebSetupClient } from 'simplysend';
@@ -152,14 +152,34 @@ const newDomain = await client.domains.create({
 });
 console.log('Verification records:', newDomain.dnsRecords);
 
-// 2. Add a subscriber to an audience group
-const subscriber = await client.subscribers.add('sub_group_123', {
-  email: 'new-user@example.com',
+// 2. Create a Contact profile globally in the Contacts Directory
+// Note: Contacts must exist globally before they can be subscribed to groups.
+const contactResponse = await client.contacts.createOrUpdate('new-user@example.com', {
   firstName: 'Alice',
+  lastName: 'Smith',
+  phone: '+1234567890',
+  globalStatus: 'active',
   consentMethod: 'single_opt_in',
-  consentProof: 'Subscribed via registration checkbox'
+  consentProof: 'User signup form'
 });
-console.log('Subscriber added:', subscriber);
+console.log('Contact created/updated:', contactResponse.data.contact);
+
+// 3. Create a Subscription Group (audience list)
+const groupResponse = await client.contacts.createGroup({
+  name: 'Newsletter List',
+  description: 'Monthly updates newsletter list'
+});
+const groupId = groupResponse.data.group.groupId!;
+console.log('Group created:', groupResponse.data.group);
+
+// 4. Subscribe the contact to the group list
+const subscriptionResponse = await client.contacts.addSubscriber(groupId, {
+  email: 'new-user@example.com',
+  isActive: true,
+  consentMethod: 'single_opt_in',
+  consentProof: 'Subscribed via landing page checkbox'
+});
+console.log('Subscribed to group:', subscriptionResponse.data.subscriber);
 ```
 
 ---
