@@ -451,10 +451,6 @@ export interface SubscriptionGroup {
    */
   groupId?: string;
 
-  /**
-   * Legacy contact list identifier.
-   */
-  contactListId?: string;
 
   /**
    * Name of the group. Required.

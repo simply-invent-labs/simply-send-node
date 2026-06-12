@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "../simply-send-sample-app"
+		},
+		{
+			"path": "../simply-send-landing-page"
 		}
 	],
 	"settings": {}

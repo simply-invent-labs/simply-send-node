@@ -781,7 +781,7 @@ export class SimplySendWebSetupClient {
 
     /**
      * Gets details for a single subscription group.
-     * @param groupId The group identifier (contactListId).
+     * @param groupId The group identifier (subscriptionGroupId).
      * @returns A promise resolving to GetSubscriptionGroupResponse.
      */
     getSubscriberGroup: async (groupId: string): Promise<GetSubscriptionGroupResponse> => {
@@ -808,7 +808,7 @@ export class SimplySendWebSetupClient {
 
     /**
      * Updates properties on an existing subscription group.
-     * @param groupId The group identifier (contactListId).
+     * @param groupId The group identifier (subscriptionGroupId).
      * @param group Updated parameters.
      * @returns A promise resolving to UpdateSubscriptionGroupResponse.
      */
@@ -824,7 +824,7 @@ export class SimplySendWebSetupClient {
 
     /**
      * Removes a subscription group.
-     * @param groupId The group identifier (contactListId) to delete.
+     * @param groupId The group identifier (subscriptionGroupId) to delete.
      * @returns A promise resolving to DeleteSubscriptionGroupResponse.
      */
     deleteSubscriberGroup: async (groupId: string): Promise<DeleteSubscriptionGroupResponse> => {
