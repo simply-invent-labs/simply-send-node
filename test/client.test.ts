@@ -200,7 +200,7 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     apiKey: 'wapi_key_789',
   });
 
-  await t.test('contacts.list() should invoke GET /web-setup/contacts', async () => {
+  await t.test('contacts.listContacts() should invoke GET /web-setup/contacts', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts?limit=10&search=john');
       assert.strictEqual(options.method, 'GET');
@@ -208,33 +208,33 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.list({ limit: 10, search: 'john' });
+    const res = await client.contacts.listContacts({ limit: 10, search: 'john' });
     assert.strictEqual(res.success, true);
     mock.restoreAll();
   });
 
-  await t.test('contacts.get() should throw validation error if identifier does not contain colon', async () => {
+  await t.test('contacts.getContact() should throw validation error if identifier format is invalid', async () => {
     await assert.rejects(
-      () => client.contacts.get('user@test.com'),
+      () => client.contacts.getContact('user@test.com'),
       (err: any) => err instanceof SimplySendValidationError && err.field === 'contactIdentifier'
     );
   });
 
-  await t.test('contacts.get() should invoke GET /web-setup/contacts/{contactIdentifier}', async () => {
+  await t.test('contacts.getContact() should invoke GET /web-setup/contacts/{contactIdentifier}', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
-      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email_4832981775432a1383848b8137350438');
       assert.strictEqual(options.method, 'GET');
       return new Response(JSON.stringify({ success: true, data: { contact: { email: 'user@test.com' }, memberships: [] } }), { status: 200 });
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.get('email:4832981775432a1383848b8137350438');
+    const res = await client.contacts.getContact('email_4832981775432a1383848b8137350438');
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data.contact.email, 'user@test.com');
     mock.restoreAll();
   });
 
-  await t.test('contacts.create() should invoke POST /web-setup/contacts', async () => {
+  await t.test('contacts.createContact() should invoke POST /web-setup/contacts', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts');
       assert.strictEqual(options.method, 'POST');
@@ -245,15 +245,15 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.create({ email: 'user@test.com', firstName: 'John' });
+    const res = await client.contacts.createContact({ email: 'user@test.com', firstName: 'John' });
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data.contact.firstName, 'John');
     mock.restoreAll();
   });
 
-  await t.test('contacts.createOrUpdate() should invoke PUT /web-setup/contacts/{contactIdentifier}', async () => {
+  await t.test('contacts.updateContact() should invoke PUT /web-setup/contacts/{contactIdentifier}', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
-      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email_4832981775432a1383848b8137350438');
       assert.strictEqual(options.method, 'PUT');
       const body = JSON.parse(options.body);
       assert.strictEqual(body.firstName, 'John');
@@ -261,27 +261,27 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.createOrUpdate('email:4832981775432a1383848b8137350438', { firstName: 'John' });
+    const res = await client.contacts.updateContact('email_4832981775432a1383848b8137350438', { firstName: 'John' });
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data.contact.firstName, 'John');
     mock.restoreAll();
   });
 
-  await t.test('contacts.delete() should invoke DELETE /web-setup/contacts/{contactIdentifier}', async () => {
+  await t.test('contacts.deleteContact() should invoke DELETE /web-setup/contacts/{contactIdentifier}', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
-      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email%3A4832981775432a1383848b8137350438');
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email_4832981775432a1383848b8137350438');
       assert.strictEqual(options.method, 'DELETE');
       return new Response(JSON.stringify({ success: true, data: { message: 'Deleted' } }), { status: 200 });
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.delete('email:4832981775432a1383848b8137350438');
+    const res = await client.contacts.deleteContact('email_4832981775432a1383848b8137350438');
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data.message, 'Deleted');
     mock.restoreAll();
   });
 
-  await t.test('contacts.createGroup() should invoke POST /web-setup/contacts/subscription-groups', async () => {
+  await t.test('contacts.createSubscriberGroup() should invoke POST /web-setup/contacts/subscription-groups', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/subscription-groups');
       assert.strictEqual(options.method, 'POST');
@@ -291,7 +291,7 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     });
     global.fetch = fetchMock as any;
 
-    const res = await client.contacts.createGroup({ name: 'Newsletter' });
+    const res = await client.contacts.createSubscriberGroup({ name: 'Newsletter' });
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data.group.groupId, 'list_123');
     mock.restoreAll();

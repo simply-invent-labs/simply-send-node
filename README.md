@@ -9,10 +9,12 @@
 <p align="center">
   Official Node.js SDK for SimplySend - a premium, high-performance transactional and marketing email sending and management platform.
 </p>
-
-
-<!-- [![npm version](https://img.shields.io/npm/v/simplysend.svg)](https://www.npmjs.com/package/simplysend) (Uncomment once published to npm) -->
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://www.npmjs.com/package/simplysend"><img src="https://img.shields.io/npm/v/simplysend.svg" alt="npm version" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D22-blue.svg" alt="Node Version" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Ready-blue.svg" alt="TypeScript" /></a>
+</p>
 
 ## Features
 
@@ -154,7 +156,8 @@ console.log('Verification records:', newDomain.dnsRecords);
 
 // 2. Create a Contact profile globally in the Contacts Directory
 // Note: Contacts must exist globally before they can be subscribed to groups.
-const contactResponse = await client.contacts.createOrUpdate('new-user@example.com', {
+const contactResponse = await client.contacts.createContact({
+  email: 'alice.smith@example.com',
   firstName: 'Alice',
   lastName: 'Smith',
   phone: '+1234567890',
@@ -162,10 +165,10 @@ const contactResponse = await client.contacts.createOrUpdate('new-user@example.c
   consentMethod: 'single_opt_in',
   consentProof: 'User signup form'
 });
-console.log('Contact created/updated:', contactResponse.data.contact);
+console.log('Contact created:', contactResponse.data.contact);
 
 // 3. Create a Subscription Group (audience list)
-const groupResponse = await client.contacts.createGroup({
+const groupResponse = await client.contacts.createSubscriberGroup({
   name: 'Newsletter List',
   description: 'Monthly updates newsletter list'
 });
