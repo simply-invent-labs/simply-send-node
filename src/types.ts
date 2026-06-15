@@ -474,14 +474,13 @@ export interface Contact {
   phone?: string;
   globalStatus?: 'active' | 'unsubscribed' | 'bounced' | 'complained' | 'suppressed';
   consentMethod?: 'double_opt_in' | 'single_opt_in' | 'imported' | 'web_form' | 'implicit_api' | 'other' | string;
-  consentProof?: string;
-  consentMethodOther?: string;
+  consentDetails?: string;
   consentIpAddress?: string;
   consentUserAgent?: string;
   consentTimestamp?: string;
   source?: string;
   addedBy?: string;
-  metadata?: Record<string, any>;
+  customFields?: Record<string, any>;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -495,11 +494,11 @@ export interface SubscriberRequest {
   phone?: string;
   isActive?: boolean;
   consentMethod?: 'double_opt_in' | 'single_opt_in' | 'imported' | 'web_form' | 'implicit_api' | 'other' | string;
-  consentProof?: string;
-  consentMethodOther?: string;
+  consentDetails?: string;
   consentIpAddress?: string;
   consentUserAgent?: string;
   source?: string;
+  customFields?: Record<string, any>;
 }
 
 /**
@@ -514,12 +513,12 @@ export interface SubscriberResponse {
   joinedAt: string;
   source: string;
   consentMethod: string;
-  consentProof: string;
+  consentDetails: string;
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
   globalStatus: string;
-  metadata: Record<string, any>;
+  customFields: Record<string, any>;
   subscriptionId: string;
 }
 

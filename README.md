@@ -163,7 +163,7 @@ const contactResponse = await client.contacts.createContact({
   phone: '+1234567890',
   globalStatus: 'active',
   consentMethod: 'single_opt_in',
-  consentProof: 'User signup form'
+  consentDetails: 'User checked physical agreement box during customer onboarding'
 });
 console.log('Contact created:', contactResponse.data.contact);
 
@@ -180,7 +180,7 @@ const subscriptionResponse = await client.contacts.addSubscriber(groupId, {
   email: 'new-user@example.com',
   isActive: true,
   consentMethod: 'single_opt_in',
-  consentProof: 'Subscribed via landing page checkbox'
+  consentDetails: 'Footer newsletter subscription form'
 });
 console.log('Subscribed to group:', subscriptionResponse.data.subscriber);
 ```

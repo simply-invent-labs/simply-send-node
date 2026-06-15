@@ -1,6 +1,6 @@
 {
   "name": "simplysend",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Official Node.js SDK for SimplySend - Send transactional and marketing emails",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
