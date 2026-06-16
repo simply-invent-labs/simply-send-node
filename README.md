@@ -172,11 +172,11 @@ const groupResponse = await client.contacts.createSubscriberGroup({
   name: 'Newsletter List',
   description: 'Monthly updates newsletter list'
 });
-const groupId = groupResponse.data.group.groupId!;
+const subscriptionGroupId = groupResponse.data.group.subscriptionGroupId!;
 console.log('Group created:', groupResponse.data.group);
 
 // 4. Subscribe the contact to the group list
-const subscriptionResponse = await client.contacts.addSubscriber(groupId, {
+const subscriptionResponse = await client.contacts.addSubscriber(subscriptionGroupId, {
   email: 'new-user@example.com',
   isActive: true,
   consentMethod: 'single_opt_in',

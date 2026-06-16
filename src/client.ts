@@ -352,11 +352,10 @@ export class SimplySendMarketingClient {
   public readonly email = {
     /**
      * Sends a marketing email.
-     * Complies with email laws by requiring a subscriptionGroupId.
      * 
      * @param payload Marketing email request fields.
      * @returns A promise resolving to the send transaction details.
-     * @throws SimplySendValidationError If local validation checks fail (e.g. missing recipient, subject, subscriptionGroupId).
+     * @throws SimplySendValidationError If local validation checks fail (e.g. missing recipient, subject).
      * @throws SimplySendHttpError If the API endpoint responds with a non-2xx status code.
      */
     send: async (payload: SendMarketingEmailRequest): Promise<SendMarketingEmailResponse> => {
@@ -372,12 +371,6 @@ export class SimplySendMarketingClient {
       if (!payload.html) {
         throw new SimplySendValidationError('HTML content (html) is required', 'html');
       }
-      if (!payload.subscriptionGroupId) {
-        throw new SimplySendValidationError(
-          'Subscription Group ID (subscriptionGroupId) is required for marketing emails',
-          'subscriptionGroupId'
-        );
-      }
 
       const toValue = Array.isArray(payload.to) ? payload.to.join(', ') : payload.to;
 
@@ -386,7 +379,7 @@ export class SimplySendMarketingClient {
         subject: payload.subject,
         html: payload.html,
         from: payload.from,
-        subscriptionGroupId: payload.subscriptionGroupId,
+        ...(payload.subscriptionGroupId && { subscriptionGroupId: payload.subscriptionGroupId }),
         ...(payload.campaignId && { campaignId: payload.campaignId }),
         ...(payload.text && { text: payload.text }),
         ...(payload.enableClickTracking !== undefined && { enableClickTracking: payload.enableClickTracking }),
@@ -781,14 +774,14 @@ export class SimplySendWebSetupClient {
 
     /**
      * Gets details for a single subscription group.
-     * @param groupId The group identifier (subscriptionGroupId).
+     * @param subscriptionGroupId The group identifier (subscriptionGroupId).
      * @returns A promise resolving to GetSubscriptionGroupResponse.
      */
-    getSubscriberGroup: async (groupId: string): Promise<GetSubscriptionGroupResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    getSubscriberGroup: async (subscriptionGroupId: string): Promise<GetSubscriptionGroupResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
-      return this.request<GetSubscriptionGroupResponse>(`contacts/subscription-groups/${groupId}`);
+      return this.request<GetSubscriptionGroupResponse>(`contacts/subscription-groups/${subscriptionGroupId}`);
     },
 
     /**
@@ -808,15 +801,15 @@ export class SimplySendWebSetupClient {
 
     /**
      * Updates properties on an existing subscription group.
-     * @param groupId The group identifier (subscriptionGroupId).
+     * @param subscriptionGroupId The group identifier (subscriptionGroupId).
      * @param group Updated parameters.
      * @returns A promise resolving to UpdateSubscriptionGroupResponse.
      */
-    updateSubscriberGroup: async (groupId: string, group: Partial<SubscriptionGroup>): Promise<UpdateSubscriptionGroupResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    updateSubscriberGroup: async (subscriptionGroupId: string, group: Partial<SubscriptionGroup>): Promise<UpdateSubscriptionGroupResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
-      return this.request<UpdateSubscriptionGroupResponse>(`contacts/subscription-groups/${groupId}`, {
+      return this.request<UpdateSubscriptionGroupResponse>(`contacts/subscription-groups/${subscriptionGroupId}`, {
         method: 'PUT',
         body: group,
       });
@@ -824,14 +817,14 @@ export class SimplySendWebSetupClient {
 
     /**
      * Removes a subscription group.
-     * @param groupId The group identifier (subscriptionGroupId) to delete.
+     * @param subscriptionGroupId The group identifier (subscriptionGroupId) to delete.
      * @returns A promise resolving to DeleteSubscriptionGroupResponse.
      */
-    deleteSubscriberGroup: async (groupId: string): Promise<DeleteSubscriptionGroupResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    deleteSubscriberGroup: async (subscriptionGroupId: string): Promise<DeleteSubscriptionGroupResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
-      return this.request<DeleteSubscriptionGroupResponse>(`contacts/subscription-groups/${groupId}`, {
+      return this.request<DeleteSubscriptionGroupResponse>(`contacts/subscription-groups/${subscriptionGroupId}`, {
         method: 'DELETE',
       });
     },
@@ -839,12 +832,12 @@ export class SimplySendWebSetupClient {
     // === Group Subscribers (Memberships) ===
     /**
      * Lists subscribers within a specific subscription group.
-     * @param groupId The target subscription group ID.
+     * @param subscriptionGroupId The target subscription group ID.
      * @param query Optional filtering and pagination parameters.
      * @returns A promise resolving to ListSubscribersResponse.
      */
     listSubscribers: async (
-      groupId: string,
+      subscriptionGroupId: string,
       query?: {
         limit?: number;
         search?: string;
@@ -852,8 +845,8 @@ export class SimplySendWebSetupClient {
         lastKey?: string;
       }
     ): Promise<ListSubscribersResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       const queryParams: Record<string, string> = {};
       if (query) {
@@ -862,25 +855,25 @@ export class SimplySendWebSetupClient {
         if (query.isActive !== undefined) queryParams.isActive = String(query.isActive);
         if (query.lastKey !== undefined) queryParams.lastKey = query.lastKey;
       }
-      return this.request<ListSubscribersResponse>(`contacts/subscription-groups/${groupId}/subscriptions`, {
+      return this.request<ListSubscribersResponse>(`contacts/subscription-groups/${subscriptionGroupId}/subscriptions`, {
         query: queryParams,
       });
     },
 
     /**
      * Subscribes a contact to a subscription group. Fails if the contact does not exist globally.
-     * @param groupId The target subscription group ID.
+     * @param subscriptionGroupId The target subscription group ID.
      * @param subscriber Subscriber request data containing email, phone, or contactIdentifier (one of these must be provided).
      * @returns A promise resolving to AddSubscriberResponse.
      */
-    addSubscriber: async (groupId: string, subscriber: SubscriberRequest): Promise<AddSubscriberResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    addSubscriber: async (subscriptionGroupId: string, subscriber: SubscriberRequest): Promise<AddSubscriberResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       if (!subscriber.email && !subscriber.contactIdentifier && !subscriber.phone) {
         throw new SimplySendValidationError('Subscriber identifier (email, phone, or contactIdentifier) is required', 'subscriber');
       }
-      return this.request<AddSubscriberResponse>(`contacts/subscription-groups/${groupId}/subscriptions`, {
+      return this.request<AddSubscriberResponse>(`contacts/subscription-groups/${subscriptionGroupId}/subscriptions`, {
         method: 'POST',
         body: subscriber,
       });
@@ -888,13 +881,13 @@ export class SimplySendWebSetupClient {
 
     /**
      * Retrieves subscription membership details for a specific subscriber in a group.
-     * @param groupId The subscription group ID.
+     * @param subscriptionGroupId The subscription group ID.
      * @param contactIdentifier The secure contact identifier (e.g. 'email_md5' or 'phone_md5').
      * @returns A promise resolving to SubscriberResponse.
      */
-    getSubscriber: async (groupId: string, contactIdentifier: string): Promise<SubscriberResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    getSubscriber: async (subscriptionGroupId: string, contactIdentifier: string): Promise<SubscriberResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       if (!contactIdentifier) {
         throw new SimplySendValidationError('Contact identifier is required', 'contactIdentifier');
@@ -903,24 +896,24 @@ export class SimplySendWebSetupClient {
         throw new SimplySendValidationError('Contact identifier must be a secure hashed value (e.g. \'email_md5\' or \'phone_md5\')', 'contactIdentifier');
       }
       return this.request<SubscriberResponse>(
-        `contacts/subscription-groups/${groupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`
+        `contacts/subscription-groups/${subscriptionGroupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`
       );
     },
 
     /**
      * Updates membership fields (e.g. toggling active status) for a subscriber.
-     * @param groupId The subscription group ID.
+     * @param subscriptionGroupId The subscription group ID.
      * @param contactIdentifier The secure contact identifier (e.g. 'email_md5' or 'phone_md5').
      * @param subscriber Partial subscriber fields to update.
      * @returns A promise resolving to AddSubscriberResponse.
      */
     updateSubscriber: async (
-      groupId: string,
+      subscriptionGroupId: string,
       contactIdentifier: string,
       subscriber: Partial<SubscriberRequest>
     ): Promise<AddSubscriberResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       if (!contactIdentifier) {
         throw new SimplySendValidationError('Contact identifier is required', 'contactIdentifier');
@@ -929,7 +922,7 @@ export class SimplySendWebSetupClient {
         throw new SimplySendValidationError('Contact identifier must be a secure hashed value (e.g. \'email_md5\' or \'phone_md5\')', 'contactIdentifier');
       }
       return this.request<AddSubscriberResponse>(
-        `contacts/subscription-groups/${groupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`,
+        `contacts/subscription-groups/${subscriptionGroupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`,
         {
           method: 'PATCH',
           body: subscriber,
@@ -939,13 +932,13 @@ export class SimplySendWebSetupClient {
 
     /**
      * Unsubscribes/removes a contact from a subscription group.
-     * @param groupId The subscription group ID.
+     * @param subscriptionGroupId The subscription group ID.
      * @param contactIdentifier The secure contact identifier (e.g. 'email_md5' or 'phone_md5').
      * @returns A promise resolving to DeleteSubscriberResponse.
      */
-    deleteSubscriber: async (groupId: string, contactIdentifier: string): Promise<DeleteSubscriberResponse> => {
-      if (!groupId) {
-        throw new SimplySendValidationError('Group ID (groupId) is required', 'groupId');
+    deleteSubscriber: async (subscriptionGroupId: string, contactIdentifier: string): Promise<DeleteSubscriberResponse> => {
+      if (!subscriptionGroupId) {
+        throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       if (!contactIdentifier) {
         throw new SimplySendValidationError('Contact identifier is required', 'contactIdentifier');
@@ -954,7 +947,7 @@ export class SimplySendWebSetupClient {
         throw new SimplySendValidationError('Contact identifier must be a secure hashed value (e.g. \'email_md5\' or \'phone_md5\')', 'contactIdentifier');
       }
       return this.request<DeleteSubscriberResponse>(
-        `contacts/subscription-groups/${groupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`,
+        `contacts/subscription-groups/${subscriptionGroupId}/subscriptions/${encodeURIComponent(contactIdentifier)}`,
         {
           method: 'DELETE',
         }

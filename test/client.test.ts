@@ -105,19 +105,7 @@ test('SimplySendMarketingClient', async (t) => {
     );
   });
 
-  await t.test('should validate subscriptionGroupId', async () => {
-    const client = new SimplySendMarketingClient({ accountId: 'acc_123', apiKey: 'key_123' });
-    await assert.rejects(
-      () => client.email.send({
-        to: 'rec@test.com',
-        from: 'sender@domain.com',
-        subject: 'sub',
-        html: 'html',
-        subscriptionGroupId: '',
-      }),
-      (err: any) => err instanceof SimplySendValidationError && err.field === 'subscriptionGroupId'
-    );
-  });
+
 
   await t.test('should send marketing email', async () => {
     const client = new SimplySendMarketingClient({
@@ -287,13 +275,13 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
       assert.strictEqual(options.method, 'POST');
       const body = JSON.parse(options.body);
       assert.strictEqual(body.name, 'Newsletter');
-      return new Response(JSON.stringify({ success: true, data: { group: { name: 'Newsletter', groupId: 'list_123' } } }), { status: 201 });
+      return new Response(JSON.stringify({ success: true, data: { group: { name: 'Newsletter', subscriptionGroupId: 'list_123' } } }), { status: 201 });
     });
     global.fetch = fetchMock as any;
 
     const res = await client.contacts.createSubscriberGroup({ name: 'Newsletter' });
     assert.strictEqual(res.success, true);
-    assert.strictEqual(res.data.group.groupId, 'list_123');
+    assert.strictEqual(res.data.group.subscriptionGroupId, 'list_123');
     mock.restoreAll();
   });
 

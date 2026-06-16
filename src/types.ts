@@ -168,9 +168,9 @@ export interface SendMarketingEmailRequest {
 
   /**
    * Subscription Group ID (or Contact List ID) associated with the marketing send.
-   * Required for unsubscribe link compliance. Required.
+   * Optional. If omitted, global contact opt-in status will be verified directly.
    */
-  subscriptionGroupId: string;
+  subscriptionGroupId?: string;
 
   /**
    * Optional Campaign ID to attribute this send for campaign analytics. Optional.
@@ -449,7 +449,7 @@ export interface SubscriptionGroup {
   /**
    * Unique subscription group identifier.
    */
-  groupId?: string;
+  subscriptionGroupId?: string;
 
 
   /**
@@ -521,7 +521,7 @@ export interface SubscriberRequest {
 export interface SubscriberResponse {
   contactIdentifier?: string;
   email?: string;
-  groupId: string;
+  subscriptionGroupId: string;
   userId: string;
   isActive: boolean;
   joinedAt: string;
@@ -551,7 +551,7 @@ export interface GetContactResponse {
   data: {
     contact: Contact;
     memberships: Array<{
-      groupId: string;
+      subscriptionGroupId: string;
       joinedAt: string;
       isActive: boolean;
       source: string;
@@ -608,7 +608,7 @@ export interface CreateSubscriptionGroupResponse {
   success: boolean;
   data: {
     group: SubscriptionGroup & {
-      groupId: string;
+      subscriptionGroupId: string;
       userId: string;
       createdAt: string;
       updatedAt: string;
@@ -645,7 +645,7 @@ export interface AddSubscriberResponse {
   data: {
     message: string;
     subscriber: {
-      groupId: string;
+      subscriptionGroupId: string;
       contactIdentifier?: string;
       email?: string;
       phone?: string;
