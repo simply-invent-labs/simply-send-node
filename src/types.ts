@@ -489,8 +489,22 @@ export interface Contact {
  * Represents the request payload to subscribe or update a contact list membership.
  */
 export interface SubscriberRequest {
+  /**
+   * Existing contact identifier (e.g. 'email_md5' or 'phone_md5').
+   * Either email, phone, or contactIdentifier must be provided.
+   */
   contactIdentifier?: string;
+
+  /**
+   * Existing contact email address to subscribe.
+   * Either email, phone, or contactIdentifier must be provided.
+   */
   email?: string;
+
+  /**
+   * Existing contact phone number to subscribe.
+   * Either email, phone, or contactIdentifier must be provided.
+   */
   phone?: string;
   isActive?: boolean;
   consentMethod?: 'double_opt_in' | 'single_opt_in' | 'imported' | 'web_form' | 'implicit_api' | 'other' | string;
@@ -512,8 +526,8 @@ export interface SubscriberResponse {
   isActive: boolean;
   joinedAt: string;
   source: string;
-  consentMethod: string;
-  consentDetails: string;
+  consentMethod?: string;
+  consentDetails?: string;
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
@@ -639,7 +653,8 @@ export interface AddSubscriberResponse {
       isActive: boolean;
       joinedAt: string;
       source: string;
-      consentMethod: string;
+      consentMethod?: string;
+      consentDetails?: string;
     };
   };
 }

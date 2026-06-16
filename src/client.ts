@@ -870,7 +870,7 @@ export class SimplySendWebSetupClient {
     /**
      * Subscribes a contact to a subscription group. Fails if the contact does not exist globally.
      * @param groupId The target subscription group ID.
-     * @param subscriber Subscriber request data containing email or contactIdentifier.
+     * @param subscriber Subscriber request data containing email, phone, or contactIdentifier (one of these must be provided).
      * @returns A promise resolving to AddSubscriberResponse.
      */
     addSubscriber: async (groupId: string, subscriber: SubscriberRequest): Promise<AddSubscriberResponse> => {
