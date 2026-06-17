@@ -230,7 +230,7 @@ export class SimplySendTransactionalClient {
 
 /**
  * Client for sending marketing emails via the SimplySend Marketing API (mapi).
- * Marketing emails require a valid subscription group ID for unsubscribe compliance.
+ * Marketing emails can optionally be associated with a subscription group ID to verify list-level consent.
  */
 export class SimplySendMarketingClient {
   /**
