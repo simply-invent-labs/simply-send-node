@@ -127,6 +127,11 @@ export interface SendTransactionalEmailRequest {
   enableClickTracking?: boolean;
 
   /**
+   * Enable open tracking pixel injection (defaults to false). Optional.
+   */
+  enableOpenTracking?: boolean;
+
+  /**
    * Optional custom SMTP headers. Optional.
    */
   headers?: Record<string, string>;
@@ -196,6 +201,11 @@ export interface SendMarketingEmailRequest {
    * Enable click redirection tracking (defaults to false). Optional.
    */
   enableClickTracking?: boolean;
+
+  /**
+   * Enable open tracking pixel injection (defaults to false). Optional.
+   */
+  enableOpenTracking?: boolean;
 }
 
 /**

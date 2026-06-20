@@ -211,6 +211,7 @@ export class SimplySendTransactionalClient {
         ...(payload.replyTo && { replyTo: payload.replyTo }),
         ...(payload.text && { text: payload.text }),
         ...(payload.enableClickTracking !== undefined && { enableClickTracking: payload.enableClickTracking }),
+        ...(payload.enableOpenTracking !== undefined && { enableOpenTracking: payload.enableOpenTracking }),
         ...(payload.headers && { headers: payload.headers }),
         ...(payload.templateVariables && { templateVariables: payload.templateVariables }),
         ...(attachments && attachments.length > 0 && { attachments }),
@@ -383,6 +384,7 @@ export class SimplySendMarketingClient {
         ...(payload.campaignId && { campaignId: payload.campaignId }),
         ...(payload.text && { text: payload.text }),
         ...(payload.enableClickTracking !== undefined && { enableClickTracking: payload.enableClickTracking }),
+        ...(payload.enableOpenTracking !== undefined && { enableOpenTracking: payload.enableOpenTracking }),
         ...(payload.headers && { headers: payload.headers }),
         ...(payload.templateVariables && { templateVariables: payload.templateVariables }),
       };

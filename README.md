@@ -95,6 +95,7 @@ try {
     text: 'Hello, World! Thank you for signing up.', // Optional plain text fallback
     replyTo: 'support@yourverifieddomain.com',     // Optional
     enableClickTracking: true,                     // Optional
+    enableOpenTracking: true,                      // Optional
     attachments: [
       {
         name: 'invoice.pdf',
@@ -129,6 +130,7 @@ try {
     subscriptionGroupId: 'sub_group_123', // Required
     campaignId: 'camp_abc_456',           // Optional campaign tracking
     enableClickTracking: true,
+    enableOpenTracking: true,
   });
 
   console.log('Marketing email sent. Message ID:', response.data?.messageId);
