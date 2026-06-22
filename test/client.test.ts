@@ -85,6 +85,39 @@ test('SimplySendTransactionalClient', async (t) => {
     assert.strictEqual(res.data?.messageId, 'msg_999');
     mock.restoreAll();
   });
+
+  await t.test('should send transactional email and include Idempotency-Key header', async () => {
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://tapi.simplysend.email/send');
+      assert.strictEqual(options.method, 'POST');
+      assert.strictEqual(options.headers['X-Api-Key'], 'tapi_key_abc');
+      assert.strictEqual(options.headers['X-Id'], 'acc_123');
+      assert.strictEqual(options.headers['Idempotency-Key'], 'test-idempotency-uuid-tx');
+
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999' } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.email.send({
+      to: 'recipient@example.com',
+      from: 'sender@domain.com',
+      subject: 'Test subject',
+      html: '<h1>Hello</h1>',
+      idempotencyKey: 'test-idempotency-uuid-tx',
+    });
+
+    assert.strictEqual(res.success, true);
+    mock.restoreAll();
+  });
 });
 
 // ============================================================================
@@ -136,6 +169,35 @@ test('SimplySendMarketingClient', async (t) => {
 
     assert.strictEqual(res.success, true);
     assert.strictEqual(res.data?.messageId, 'msg_888');
+    mock.restoreAll();
+  });
+
+  await t.test('should send marketing email with Idempotency-Key header', async () => {
+    const client = new SimplySendMarketingClient({
+      accountId: 'acc_123',
+      apiKey: 'mapi_key_xyz',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://mapi.simplysend.email/send');
+      assert.strictEqual(options.headers['X-Api-Key'], 'mapi_key_xyz');
+      assert.strictEqual(options.headers['X-Id'], 'acc_123');
+      assert.strictEqual(options.headers['Idempotency-Key'], 'test-idempotency-uuid-mkt');
+
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_888' } }), { status: 200 });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.email.send({
+      to: 'rec@test.com',
+      from: 'sender@domain.com',
+      subject: 'sub',
+      html: 'html',
+      idempotencyKey: 'test-idempotency-uuid-mkt',
+    });
+
+    assert.strictEqual(res.success, true);
     mock.restoreAll();
   });
 });

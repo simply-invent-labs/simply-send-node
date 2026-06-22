@@ -95,6 +95,7 @@ export class SimplySendTransactionalClient {
       method?: string;
       body?: any;
       query?: Record<string, string>;
+      headers?: Record<string, string>;
     } = {}
   ): Promise<T> {
     const base = this.emailApiUrl.endsWith('/') ? this.emailApiUrl : `${this.emailApiUrl}/`;
@@ -113,6 +114,7 @@ export class SimplySendTransactionalClient {
       'Content-Type': 'application/json',
       'X-Api-Key': this.apiKey,
       'X-Id': this.accountId,
+      ...options.headers,
     };
 
     const controller = new AbortController();
@@ -220,6 +222,9 @@ export class SimplySendTransactionalClient {
       return this.request<SendTransactionalEmailResponse>('send', {
         method: 'POST',
         body,
+        ...(payload.idempotencyKey && {
+          headers: { 'Idempotency-Key': payload.idempotencyKey }
+        })
       });
     }
   };
@@ -289,6 +294,7 @@ export class SimplySendMarketingClient {
       method?: string;
       body?: any;
       query?: Record<string, string>;
+      headers?: Record<string, string>;
     } = {}
   ): Promise<T> {
     const base = this.marketingApiUrl.endsWith('/') ? this.marketingApiUrl : `${this.marketingApiUrl}/`;
@@ -307,6 +313,7 @@ export class SimplySendMarketingClient {
       'Content-Type': 'application/json',
       'X-Api-Key': this.apiKey,
       'X-Id': this.accountId,
+      ...options.headers,
     };
 
     const controller = new AbortController();
@@ -392,6 +399,9 @@ export class SimplySendMarketingClient {
       return this.request<SendMarketingEmailResponse>('send', {
         method: 'POST',
         body,
+        ...(payload.idempotencyKey && {
+          headers: { 'Idempotency-Key': payload.idempotencyKey }
+        })
       });
     }
   };

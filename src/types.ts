@@ -145,6 +145,11 @@ export interface SendTransactionalEmailRequest {
    * List of email attachments. Optional.
    */
   attachments?: Attachment[];
+
+  /**
+   * Unique UUID string to identify this request for idempotency. Optional.
+   */
+  idempotencyKey?: string;
 }
 
 /**
@@ -206,6 +211,11 @@ export interface SendMarketingEmailRequest {
    * Enable open tracking pixel injection (defaults to false). Optional.
    */
   enableOpenTracking?: boolean;
+
+  /**
+   * Unique UUID string to identify this request for idempotency. Optional.
+   */
+  idempotencyKey?: string;
 }
 
 /**
