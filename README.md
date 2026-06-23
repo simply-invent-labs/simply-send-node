@@ -185,6 +185,14 @@ const subscriptionResponse = await client.contacts.addSubscriber(subscriptionGro
   consentDetails: 'Footer newsletter subscription form'
 });
 console.log('Subscribed to group:', subscriptionResponse.data.subscriber);
+
+// 5. Register a Webhook to subscribe to inbound email received events
+const newWebhook = await client.webhooks.create({
+  url: 'https://your-server.com/webhooks/simply-send',
+  events: ['email_received'],
+  description: 'Webhook to receive inbound support emails'
+});
+console.log('Webhook created successfully with ID:', newWebhook.webhookId);
 ```
 
 ---
