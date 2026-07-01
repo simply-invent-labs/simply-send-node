@@ -27,6 +27,10 @@ import {
   AddSubscriberResponse,
   DeleteSubscriberResponse,
   EmailTemplate,
+  ComplianceTemplate,
+  ComplianceTemplateResponse,
+  ListComplianceTemplatesResponse,
+  DeleteComplianceTemplateResponse,
   Webhook,
   UseCase,
 } from './types';
@@ -1084,6 +1088,70 @@ export class SimplySendWebSetupClient {
      */
     delete: async (webhookId: string): Promise<{ message: string }> => {
       return this.request<{ message: string }>(`webhooks/${webhookId}`, {
+        method: 'DELETE',
+      });
+    },
+  };
+
+  // -------------------------------------------------------------
+  // Namespace: complianceTemplates
+  // -------------------------------------------------------------
+  /**
+   * Namespace container for managing legal compliance templates (unsubscribe, report abuse, company address).
+   */
+  public readonly complianceTemplates = {
+    /**
+     * Lists all compliance templates saved under your account.
+     * @param type Optional filter by template type.
+     * @returns A response containing the array of compliance templates.
+     */
+    list: async (type?: string): Promise<ListComplianceTemplatesResponse> => {
+      return this.request<ListComplianceTemplatesResponse>('compliance-templates', {
+        ...(type && { query: { type } }),
+      });
+    },
+
+    /**
+     * Retrieves details for a specific compliance template.
+     * @param templateId The unique compliance template identifier.
+     * @returns A response containing the compliance template.
+     */
+    get: async (templateId: string): Promise<ComplianceTemplateResponse> => {
+      return this.request<ComplianceTemplateResponse>(`compliance-templates/${templateId}`);
+    },
+
+    /**
+     * Creates a new compliance template.
+     * @param template Compliance template fields including name, type, and htmlContent.
+     * @returns A response containing the created compliance template.
+     */
+    create: async (template: ComplianceTemplate): Promise<ComplianceTemplateResponse> => {
+      return this.request<ComplianceTemplateResponse>('compliance-templates', {
+        method: 'POST',
+        body: template,
+      });
+    },
+
+    /**
+     * Updates an existing compliance template.
+     * @param templateId The unique compliance template identifier.
+     * @param template Updated compliance template parameters.
+     * @returns A response containing the updated compliance template.
+     */
+    update: async (templateId: string, template: ComplianceTemplate): Promise<ComplianceTemplateResponse> => {
+      return this.request<ComplianceTemplateResponse>(`compliance-templates/${templateId}`, {
+        method: 'PUT',
+        body: template,
+      });
+    },
+
+    /**
+     * Deletes a compliance template.
+     * @param templateId Unique compliance template identifier to delete.
+     * @returns A response containing the success message.
+     */
+    delete: async (templateId: string): Promise<DeleteComplianceTemplateResponse> => {
+      return this.request<DeleteComplianceTemplateResponse>(`compliance-templates/${templateId}`, {
         method: 'DELETE',
       });
     },

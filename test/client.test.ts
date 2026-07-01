@@ -365,7 +365,140 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
 });
 
 // ============================================================================
-// 5. HTTP Errors & Wrapping
+// 5. SimplySendWebSetupClient Compliance Templates API
+// ============================================================================
+test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
+  await t.test('complianceTemplates.list() should invoke GET /web-setup/compliance-templates', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/compliance-templates');
+      assert.strictEqual(options.method, 'GET');
+      assert.strictEqual(options.headers['X-Api-Key'], 'wapi_key_789');
+      assert.strictEqual(options.headers['X-Id'], 'acc_123');
+
+      return new Response(JSON.stringify({ success: true, data: { templates: [] } }), { status: 200 });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.complianceTemplates.list();
+    assert.deepStrictEqual(res.data.templates, []);
+    mock.restoreAll();
+  });
+
+  await t.test('complianceTemplates.list() should pass type query parameter', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any) => {
+      assert.ok(url.toString().includes('type=unsubscribe'));
+      return new Response(JSON.stringify({ success: true, data: { templates: [] } }), { status: 200 });
+    });
+
+    global.fetch = fetchMock as any;
+
+    await client.complianceTemplates.list('unsubscribe');
+    mock.restoreAll();
+  });
+
+  await t.test('complianceTemplates.create() should invoke POST /web-setup/compliance-templates', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/compliance-templates');
+      assert.strictEqual(options.method, 'POST');
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.name, 'Unsubscribe Footer');
+      assert.strictEqual(body.type, 'unsubscribe');
+      assert.strictEqual(body.htmlContent, '<p><a href="{{unsubscribeUrl}}">Unsubscribe</a></p>');
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            template: {
+              templateId: 'compliance_123',
+              name: 'Unsubscribe Footer',
+              type: 'unsubscribe',
+              htmlContent: '<p><a href="{{unsubscribeUrl}}">Unsubscribe</a></p>',
+              isDefault: true,
+            },
+          },
+        }),
+        { status: 201 }
+      );
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.complianceTemplates.create({
+      name: 'Unsubscribe Footer',
+      type: 'unsubscribe',
+      htmlContent: '<p><a href="{{unsubscribeUrl}}">Unsubscribe</a></p>',
+    });
+    assert.strictEqual(res.data.template.templateId, 'compliance_123');
+    mock.restoreAll();
+  });
+
+  await t.test('complianceTemplates.update() should invoke PUT /web-setup/compliance-templates/{id}', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/compliance-templates/compliance_123');
+      assert.strictEqual(options.method, 'PUT');
+
+      return new Response(
+        JSON.stringify({ success: true, data: { template: { templateId: 'compliance_123', name: 'Updated' } } }),
+        { status: 200 }
+      );
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.complianceTemplates.update('compliance_123', {
+      name: 'Updated',
+      type: 'unsubscribe',
+      htmlContent: '<p>Updated</p>',
+    });
+    assert.strictEqual(res.data.template.name, 'Updated');
+    mock.restoreAll();
+  });
+
+  await t.test('complianceTemplates.delete() should invoke DELETE /web-setup/compliance-templates/{id}', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/compliance-templates/compliance_123');
+      assert.strictEqual(options.method, 'DELETE');
+
+      return new Response(JSON.stringify({ success: true, data: { message: 'Compliance template deleted', templateId: 'compliance_123' } }), { status: 200 });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.complianceTemplates.delete('compliance_123');
+    assert.strictEqual(res.data.message, 'Compliance template deleted');
+    mock.restoreAll();
+  });
+});
+
+// ============================================================================
+// 6. HTTP Errors & Wrapping
 // ============================================================================
 test('SimplySend Client Error Wrapping', async (t) => {
   await t.test('should wrap non-2xx responses into SimplySendHttpError', async () => {

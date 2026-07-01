@@ -737,6 +737,87 @@ export interface EmailTemplate {
 }
 
 /**
+ * Represents a legal compliance template (unsubscribe, report abuse, or company address).
+ */
+export interface ComplianceTemplate {
+  /**
+   * Unique template identifier. Optional on create.
+   */
+  templateId?: string;
+
+  /**
+   * Human-readable template name. Required.
+   */
+  name: string;
+
+  /**
+   * Compliance template type. Required.
+   */
+  type: 'unsubscribe' | 'report_abuse' | 'company_address';
+
+  /**
+   * HTML content of the template. Required.
+   */
+  htmlContent: string;
+
+  /**
+   * Whether this is the default template for its type. Optional.
+   */
+  isDefault?: boolean;
+
+  /**
+   * Whether the template is active. Returned by the API.
+   */
+  isActive?: boolean;
+
+  /**
+   * Approval status. Returned by the API.
+   */
+  status?: 'approved' | 'pending-approval' | 'rejected';
+
+  /**
+   * Creation timestamp. Returned by the API.
+   */
+  createdAt?: string;
+
+  /**
+   * Last update timestamp. Returned by the API.
+   */
+  updatedAt?: string;
+}
+
+/**
+ * Response wrapper returned when a compliance template is created, retrieved, or updated.
+ */
+export interface ComplianceTemplateResponse {
+  success: boolean;
+  data: {
+    template: ComplianceTemplate;
+  };
+}
+
+/**
+ * Response wrapper returned when listing compliance templates.
+ */
+export interface ListComplianceTemplatesResponse {
+  success: boolean;
+  data: {
+    templates: ComplianceTemplate[];
+  };
+}
+
+/**
+ * Response wrapper returned when deleting a compliance template.
+ */
+export interface DeleteComplianceTemplateResponse {
+  success: boolean;
+  data: {
+    message: string;
+    templateId: string;
+  };
+}
+
+/**
  * Represents a webhook callback subscription.
  */
 export interface Webhook {
