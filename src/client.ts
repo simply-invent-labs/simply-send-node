@@ -1103,11 +1103,15 @@ export class SimplySendWebSetupClient {
     /**
      * Lists all compliance templates saved under your account.
      * @param type Optional filter by template type.
+     * @param domain Optional filter by sending domain.
      * @returns A response containing the array of compliance templates.
      */
-    list: async (type?: string): Promise<ListComplianceTemplatesResponse> => {
+    list: async (type?: string, domain?: string): Promise<ListComplianceTemplatesResponse> => {
+      const query: Record<string, string> = {};
+      if (type) query.type = type;
+      if (domain) query.domain = domain;
       return this.request<ListComplianceTemplatesResponse>('compliance-templates', {
-        ...(type && { query: { type } }),
+        ...(Object.keys(query).length > 0 && { query }),
       });
     },
 

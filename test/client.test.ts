@@ -407,6 +407,23 @@ test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
     mock.restoreAll();
   });
 
+  await t.test('complianceTemplates.list() should pass domain query parameter', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+
+    const fetchMock = mock.fn(async (url: any) => {
+      assert.ok(url.toString().includes('domain=acme.com'));
+      return new Response(JSON.stringify({ success: true, data: { templates: [] } }), { status: 200 });
+    });
+
+    global.fetch = fetchMock as any;
+
+    await client.complianceTemplates.list(undefined, 'acme.com');
+    mock.restoreAll();
+  });
+
   await t.test('complianceTemplates.create() should invoke POST /web-setup/compliance-templates', async () => {
     const client = new SimplySendWebSetupClient({
       accountId: 'acc_123',

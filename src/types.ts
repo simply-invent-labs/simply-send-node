@@ -756,6 +756,11 @@ export interface ComplianceTemplate {
   type: 'unsubscribe' | 'report_abuse' | 'company_address';
 
   /**
+   * Optional sending domain to associate this template with (e.g. acme.com).
+   */
+  domain?: string;
+
+  /**
    * HTML content of the template. Required.
    */
   htmlContent: string;
