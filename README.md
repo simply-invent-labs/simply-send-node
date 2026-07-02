@@ -37,6 +37,7 @@ npm install simplysend
 To connect to SimplySend, you will initialize the specialized client class corresponding to the API features you need. Each constructor requires your **Account ID** and the respective **API Key** (retrieved from the **Settings** page in your SimplySend Dashboard).
 
 ### 1. SimplySendTransactionalClient
+
 Used to send transactional emails (OTPs, receipts, alerts).
 
 ```typescript
@@ -49,6 +50,7 @@ const client = new SimplySendTransactionalClient({
 ```
 
 ### 2. SimplySendMarketingClient
+
 Used to send newsletters or marketing campaigns.
 
 ```typescript
@@ -61,6 +63,7 @@ const client = new SimplySendMarketingClient({
 ```
 
 ### 3. SimplySendWebSetupClient
+
 Used for resource management (domains, templates, subscribers, webhooks).
 
 ```typescript
@@ -90,6 +93,8 @@ try {
   const response: SendTransactionalEmailResponse = await client.email.send({
     from: 'welcome@yourverifieddomain.com',
     to: 'customer@example.com',
+    cc: 'manager@example.com',                    // Optional CC recipient(s)
+    bcc: 'admin@example.com',                    // Optional BCC recipient(s) - BCC-only send when used without to/cc
     subject: 'Welcome!',
     html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>',
     text: 'Hello, World! Thank you for signing up.', // Optional plain text fallback
@@ -203,8 +208,8 @@ When initializing, each client class expects exactly the same configuration prop
 
 | Property | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `accountId` | `string` | **Yes** | Your unique SimplySend Account ID, found on the Account page of the SimplySend website (https://app.simplysend.email/account). |
-| `apiKey` | `string` | **Yes** | The SimplySend API Key for authentication, found on the API Keys page of the SimplySend website (https://app.simplysend.email/api-keys). |
+| `accountId` | `string` | **Yes** | Your unique SimplySend Account ID, found on the Account page of the [SimplySend website](https://app.simplysend.email/account). |
+| `apiKey` | `string` | **Yes** | The SimplySend API Key for authentication, found on the API Keys page of the [SimplySend website](https://app.simplysend.email/api-keys). |
 
 ---
 

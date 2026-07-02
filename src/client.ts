@@ -173,8 +173,19 @@ export class SimplySendTransactionalClient {
      * @throws SimplySendHttpError If the API endpoint responds with a non-2xx status code.
      */
     send: async (payload: SendTransactionalEmailRequest): Promise<SendTransactionalEmailResponse> => {
-      if (!payload.to || (Array.isArray(payload.to) && payload.to.length === 0)) {
-        throw new SimplySendValidationError('Recipient (to) is required', 'to');
+      // At least one of to or bcc is required
+      const hasTo = payload.to && (!Array.isArray(payload.to) || payload.to.length > 0);
+      const hasBcc = payload.bcc && (!Array.isArray(payload.bcc) || payload.bcc.length > 0);
+      if (!hasTo && !hasBcc) {
+        throw new SimplySendValidationError('At least one recipient (to or bcc) is required', 'to');
+      }
+      // BCC-only constraint: when bcc is present, to and cc must be absent
+      if (hasBcc && hasTo) {
+        throw new SimplySendValidationError('BCC cannot be used with To. Use either To/Cc or Bcc, not both.', 'bcc');
+      }
+      const hasCc = payload.cc && (!Array.isArray(payload.cc) || payload.cc.length > 0);
+      if (hasBcc && hasCc) {
+        throw new SimplySendValidationError('BCC cannot be used with Cc. Use either To/Cc or Bcc, not both.', 'bcc');
       }
       if (!payload.subject) {
         throw new SimplySendValidationError('Subject is required', 'subject');
@@ -188,6 +199,7 @@ export class SimplySendTransactionalClient {
 
       const toValue = Array.isArray(payload.to) ? payload.to.join(', ') : payload.to;
       const ccValue = Array.isArray(payload.cc) ? payload.cc.join(', ') : payload.cc;
+      const bccValue = Array.isArray(payload.bcc) ? payload.bcc.join(', ') : payload.bcc;
 
       const attachments = payload.attachments?.map((att) => {
         let contentStr = '';
@@ -209,11 +221,12 @@ export class SimplySendTransactionalClient {
       });
 
       const body = {
-        to: toValue,
+        ...(toValue && { to: toValue }),
         subject: payload.subject,
         html: payload.html,
         from: payload.from,
         ...(ccValue && { cc: ccValue }),
+        ...(bccValue && { bcc: bccValue }),
         ...(payload.replyTo && { replyTo: payload.replyTo }),
         ...(payload.text && { text: payload.text }),
         ...(payload.enableClickTracking !== undefined && { enableClickTracking: payload.enableClickTracking }),

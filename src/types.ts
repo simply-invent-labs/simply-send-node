@@ -87,9 +87,10 @@ export interface Attachment {
  */
 export interface SendTransactionalEmailRequest {
   /**
-   * Recipient email address(es). Can be a single string (comma-separated if multiple) or an array of strings. Required.
+   * Recipient email address(es). Can be a single string (comma-separated if multiple) or an array of strings.
+   * Required unless bcc is provided. Cannot be used together with bcc.
    */
-  to: string | string[];
+  to?: string | string[];
 
   /**
    * Email subject line. Required.
@@ -108,8 +109,16 @@ export interface SendTransactionalEmailRequest {
 
   /**
    * CC recipient email address(es). Can be a single string or an array of strings. Optional.
+   * Cannot be used together with bcc.
    */
   cc?: string | string[];
+
+  /**
+   * BCC recipient email address(es). Can be a single string or an array of strings. Optional.
+   * When bcc is provided, to and cc must be omitted (BCC-only send).
+   * Cannot be used together with attachments.
+   */
+  bcc?: string | string[];
 
   /**
    * Reply-To email address. Optional.
@@ -237,17 +246,12 @@ export interface SendTransactionalEmailResponse {
     message?: string;
 
     /**
-     * Unique tracking message identifier generated for the email transaction. Required.
-     */
-    messageId: string;
-
-    /**
      * Sender email address used. Required.
      */
     from: string;
 
     /**
-     * Total number of recipients targeted (to + cc). Required.
+     * Total number of recipients targeted (to + cc + bcc). Required.
      */
     totalRecipients: number;
 
@@ -266,9 +270,15 @@ export interface SendTransactionalEmailResponse {
       status: string;
 
       /**
-       * Role of the recipient (e.g. 'to', 'cc'). Required.
+       * Role of the recipient (e.g. 'to', 'cc', 'bcc'). Required.
        */
       role: string;
+
+      /**
+       * Unique tracking message identifier generated for this recipient's email.
+       * Each recipient gets a distinct messageId. Optional.
+       */
+      messageId?: string;
     }>;
 
     /**
@@ -307,9 +317,9 @@ export interface SendMarketingEmailResponse {
     message?: string;
 
     /**
-     * Unique tracking message identifier generated for the marketing email transaction. Required.
+     * Job ID for the asynchronously queued marketing campaign. Required.
      */
-    messageId: string;
+    jobId: string;
 
     /**
      * Sender email address used. Required.
@@ -345,6 +355,16 @@ export interface SendMarketingEmailResponse {
      * Aggregated send status. Required.
      */
     status: string;
+
+    /**
+     * Campaign ID the send was attributed to, if provided. Optional.
+     */
+    campaignId?: string;
+
+    /**
+     * Subscription group ID the campaign was sent to, if provided. Optional.
+     */
+    subscriptionGroupId?: string;
   };
 
   /**

@@ -59,7 +59,7 @@ test('SimplySendTransactionalClient', async (t) => {
       // Buffer of 'hello' base64 encoded is 'aGVsbG8='
       assert.strictEqual(body.attachments[0].content, 'aGVsbG8=');
 
-      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999' } }), {
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999', from: 'sender@domain.com', totalRecipients: 1, recipients: [{ email: 'recipient@example.com', status: 'sent', role: 'to', messageId: 'msg_999' }], status: 'sent' } }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -82,7 +82,7 @@ test('SimplySendTransactionalClient', async (t) => {
     });
 
     assert.strictEqual(res.success, true);
-    assert.strictEqual(res.data?.messageId, 'msg_999');
+    assert.strictEqual(res.data?.recipients[0]?.messageId, 'msg_999');
     mock.restoreAll();
   });
 
@@ -99,7 +99,7 @@ test('SimplySendTransactionalClient', async (t) => {
       assert.strictEqual(options.headers['X-Id'], 'acc_123');
       assert.strictEqual(options.headers['Idempotency-Key'], 'test-idempotency-uuid-tx');
 
-      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999' } }), {
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999', from: 'sender@domain.com', totalRecipients: 1, recipients: [{ email: 'recipient@example.com', status: 'sent', role: 'to', messageId: 'msg_999' }], status: 'sent' } }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -117,6 +117,136 @@ test('SimplySendTransactionalClient', async (t) => {
 
     assert.strictEqual(res.success, true);
     mock.restoreAll();
+  });
+
+  await t.test('should send transactional email with BCC only (BCC-only send)', async () => {
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://tapi.simplysend.email/send');
+      assert.strictEqual(options.method, 'POST');
+      assert.strictEqual(options.headers['X-Api-Key'], 'tapi_key_abc');
+      assert.strictEqual(options.headers['X-Id'], 'acc_123');
+
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.bcc, 'bcc@example.com');
+      assert.strictEqual(body.to, undefined);
+      assert.strictEqual(body.cc, undefined);
+
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999', from: 'sender@domain.com', totalRecipients: 1, recipients: [{ email: 'bcc@example.com', status: 'sent', role: 'bcc', messageId: 'msg_999' }], status: 'sent' } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.email.send({
+      bcc: 'bcc@example.com',
+      from: 'sender@domain.com',
+      subject: 'Test subject',
+      html: '<h1>Hello</h1>',
+    });
+
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data?.recipients[0]?.messageId, 'msg_999');
+    mock.restoreAll();
+  });
+
+  await t.test('should send transactional email with BCC array', async () => {
+    mock.restoreAll();
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    const fetchMock = mock.fn(async (url: any, options: any) => {
+      assert.strictEqual(url, 'https://tapi.simplysend.email/send');
+      assert.strictEqual(options.method, 'POST');
+      assert.strictEqual(options.headers['X-Api-Key'], 'tapi_key_abc');
+      assert.strictEqual(options.headers['X-Id'], 'acc_123');
+
+      const body = JSON.parse(options.body);
+      assert.strictEqual(body.bcc, 'bcc1@example.com, bcc2@example.com');
+      assert.strictEqual(body.to, undefined);
+      assert.strictEqual(body.cc, undefined);
+
+      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_999', from: 'sender@domain.com', totalRecipients: 2, recipients: [{ email: 'bcc1@example.com', status: 'sent', role: 'bcc', messageId: 'msg_999' }, { email: 'bcc2@example.com', status: 'sent', role: 'bcc', messageId: 'msg_999' }], status: 'sent' } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    global.fetch = fetchMock as any;
+
+    const res = await client.email.send({
+      bcc: ['bcc1@example.com', 'bcc2@example.com'],
+      from: 'sender@domain.com',
+      subject: 'Test subject',
+      html: '<h1>Hello</h1>',
+    });
+
+    assert.strictEqual(res.success, true);
+    assert.strictEqual(res.data?.recipients[0]?.messageId, 'msg_999');
+    mock.restoreAll();
+  });
+
+  await t.test('should reject BCC with TO (mutually exclusive)', async () => {
+    mock.restoreAll();
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    await assert.rejects(
+      () => client.email.send({
+        to: 'to@example.com',
+        bcc: 'bcc@example.com',
+        from: 'sender@domain.com',
+        subject: 'Test subject',
+        html: '<h1>Hello</h1>',
+      }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'bcc'
+    );
+  });
+
+  await t.test('should reject BCC with CC (mutually exclusive)', async () => {
+    mock.restoreAll();
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    await assert.rejects(
+      () => client.email.send({
+        cc: 'cc@example.com',
+        bcc: 'bcc@example.com',
+        from: 'sender@domain.com',
+        subject: 'Test subject',
+        html: '<h1>Hello</h1>',
+      }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'bcc'
+    );
+  });
+
+  await t.test('should reject when neither TO nor BCC is provided', async () => {
+    mock.restoreAll();
+    const client = new SimplySendTransactionalClient({
+      accountId: 'acc_123',
+      apiKey: 'tapi_key_abc',
+    });
+
+    await assert.rejects(
+      () => client.email.send({
+        from: 'sender@domain.com',
+        subject: 'Test subject',
+        html: '<h1>Hello</h1>',
+      }),
+      (err: any) => err instanceof SimplySendValidationError && err.field === 'to'
+    );
   });
 });
 
@@ -154,7 +284,7 @@ test('SimplySendMarketingClient', async (t) => {
       const body = JSON.parse(options.body);
       assert.strictEqual(body.subscriptionGroupId, 'group_99');
 
-      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_888' } }), { status: 200 });
+      return new Response(JSON.stringify({ success: true, data: { jobId: 'msg_888', from: 'sender@domain.com', totalRecipients: 1, recipients: [{ email: 'rec@test.com', status: 'queued', role: 'to' }], status: 'queued' } }), { status: 200 });
     });
 
     global.fetch = fetchMock as any;
@@ -168,7 +298,7 @@ test('SimplySendMarketingClient', async (t) => {
     });
 
     assert.strictEqual(res.success, true);
-    assert.strictEqual(res.data?.messageId, 'msg_888');
+    assert.strictEqual(res.data?.jobId, 'msg_888');
     mock.restoreAll();
   });
 
@@ -184,7 +314,7 @@ test('SimplySendMarketingClient', async (t) => {
       assert.strictEqual(options.headers['X-Id'], 'acc_123');
       assert.strictEqual(options.headers['Idempotency-Key'], 'test-idempotency-uuid-mkt');
 
-      return new Response(JSON.stringify({ success: true, data: { messageId: 'msg_888' } }), { status: 200 });
+      return new Response(JSON.stringify({ success: true, data: { jobId: 'msg_888', from: 'sender@domain.com', totalRecipients: 1, recipients: [{ email: 'rec@test.com', status: 'queued', role: 'to' }], status: 'queued' } }), { status: 200 });
     });
 
     global.fetch = fetchMock as any;
