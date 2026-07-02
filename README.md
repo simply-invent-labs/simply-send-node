@@ -94,7 +94,8 @@ try {
     from: 'welcome@yourverifieddomain.com',
     to: 'customer@example.com',
     cc: 'manager@example.com',                    // Optional CC recipient(s)
-    bcc: 'admin@example.com',                    // Optional BCC recipient(s) - BCC-only send when used without to/cc
+    bcc: 'admin@example.com',                    // Optional BCC recipient(s)
+    // Note: BCC is mutually exclusive with TO and CC. Use either TO/CC or BCC, not both.
     subject: 'Welcome!',
     html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>',
     text: 'Hello, World! Thank you for signing up.', // Optional plain text fallback
@@ -130,6 +131,7 @@ try {
   const response: SendMarketingEmailResponse = await client.email.send({
     from: 'newsletter@yourverifieddomain.com',
     to: 'subscriber@example.com',
+    // Note: BCC and CC are not supported for marketing emails. Use the "to" field only.
     subject: 'June Newsletter',
     html: '<h1>Our monthly updates</h1><p>Here is what is new...</p>{{company_address_html}}{{unsubscribe_email_html}}',
     subscriptionGroupId: 'sub_group_123', // Required
@@ -249,6 +251,85 @@ try {
     console.error('Network/Request Error:', error.message);
   }
 }
+```
+
+## BCC Usage
+
+The SDK supports BCC (Blind Carbon Copy) for transactional emails. BCC recipients are hidden from other recipients.
+
+### BCC-only Send
+
+To send a BCC-only email (no visible TO or CC recipients), provide only the `bcc` field:
+
+```typescript
+const response = await client.email.send({
+  from: 'sender@yourdomain.com',
+  bcc: 'recipient@example.com',
+  subject: 'Subject',
+  html: '<p>Email content</p>'
+});
+```
+
+### BCC with TO/CC
+
+The SDK enforces that BCC is mutually exclusive with TO and CC. You cannot use BCC together with TO or CC - the SDK will throw a validation error:
+
+```typescript
+// This will throw a SimplySendValidationError
+await client.email.send({
+  from: 'sender@yourdomain.com',
+  to: 'to@example.com',
+  bcc: 'bcc@example.com',  // ❌ Error: BCC cannot be used with TO
+  subject: 'Subject',
+  html: '<p>Email content</p>'
+});
+```
+
+### Multiple BCC Recipients
+
+You can pass an array of BCC recipients:
+
+```typescript
+const response = await client.email.send({
+  from: 'sender@yourdomain.com',
+  bcc: ['bcc1@example.com', 'bcc2@example.com'],
+  subject: 'Subject',
+  html: '<p>Email content</p>'
+});
+```
+
+## Marketing Email Limitations
+
+Marketing emails have different requirements than transactional emails for compliance reasons:
+
+### No BCC or CC Support
+
+Marketing emails do not support BCC or CC recipients. This is because:
+
+- BCC addresses cannot be tracked for unsubscribes
+- Consent verification requires visible recipient information
+- RFC 8058 compliance requires clear unsubscribe mechanisms
+
+Always use the `to` field for marketing emails:
+
+```typescript
+// ✅ Correct - Marketing email with TO only
+await marketingClient.email.send({
+  from: 'newsletter@yourdomain.com',
+  to: 'subscriber@example.com',
+  subject: 'Newsletter',
+  html: '<p>Content</p>',
+  subscriptionGroupId: 'group_123'
+});
+
+// ❌ Error - BCC not supported for marketing emails
+await marketingClient.email.send({
+  from: 'newsletter@yourdomain.com',
+  bcc: 'bcc@example.com',  // Will throw validation error
+  subject: 'Newsletter',
+  html: '<p>Content</p>',
+  subscriptionGroupId: 'group_123'
+});
 ```
 
 ## License

@@ -116,7 +116,6 @@ export interface SendTransactionalEmailRequest {
   /**
    * BCC recipient email address(es). Can be a single string or an array of strings. Optional.
    * When bcc is provided, to and cc must be omitted (BCC-only send).
-   * Cannot be used together with attachments.
    */
   bcc?: string | string[];
 
@@ -167,6 +166,7 @@ export interface SendTransactionalEmailRequest {
 export interface SendMarketingEmailRequest {
   /**
    * Recipient email address(es). Can be a single string or an array of strings. Required.
+   * Note: BCC and CC are not supported for marketing emails. Use the "to" field only.
    */
   to: string | string[];
 
