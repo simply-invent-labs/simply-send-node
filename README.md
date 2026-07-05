@@ -91,21 +91,21 @@ const client = new SimplySendTransactionalClient({
 
 try {
   const response: SendTransactionalEmailResponse = await client.email.send({
-    from: 'welcome@yourverifieddomain.com',
-    to: 'customer@example.com',
-    cc: 'manager@example.com',                    // Optional CC recipient(s)
-    bcc: 'admin@example.com',                    // Optional BCC recipient(s)
+    from: 'Acme Welcome Team <welcome@yourverifieddomain.com>', // Verified domain email with display name
+    to: 'customer@example.com',                     // Valid email or "Display Name <email@example.com>"
+    cc: 'manager@example.com',                      // Optional: CC recipient(s)
+    bcc: 'admin@example.com',                       // Optional: BCC recipient(s)
     // Note: BCC is mutually exclusive with TO and CC. Use either TO/CC or BCC, not both.
-    subject: 'Welcome!',
-    html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>',
-    text: 'Hello, World! Thank you for signing up.', // Optional plain text fallback
-    replyTo: 'support@yourverifieddomain.com',     // Optional
-    enableClickTracking: true,                     // Optional
-    enableOpenTracking: true,                      // Optional
+    subject: 'Welcome!',                            // UTF-8 text, max 998 chars per line
+    html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>', // Max 10MB including attachments
+    text: 'Hello, World! Thank you for signing up.', // Optional: Plain text version for accessibility
+    replyTo: 'support@yourverifieddomain.com',      // Optional: "Display Name <email@example.com>" or "email@example.com>"
+    enableClickTracking: true,                      // Optional: Boolean for link tracking
+    enableOpenTracking: true,                       // Optional: Boolean for open tracking
     attachments: [
       {
-        name: 'invoice.pdf',
-        contentType: 'application/pdf',
+        name: 'invoice.pdf',                        // File name with extension
+        contentType: 'application/pdf',             // MIME type (PDF, PNG, JPG, CSV, DOCX)
         content: Buffer.from('PDF content here...'), // Automatically encoded to base64 by SDK
       }
     ]
