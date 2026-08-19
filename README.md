@@ -162,6 +162,11 @@ const newDomain = await client.domains.create({
   useCaseId: 'tx-us-east-1'
 });
 console.log('Verification records:', newDomain.dnsRecords);
+// Publish those records, then verify the domain. If the apex already has an SPF
+// TXT from Google Workspace, Microsoft 365, or another provider, merge Simply Send
+// into that record — do not add a second v=spf1 TXT.
+// https://simplysend.email/docs/guide/domain-verification/spf
+// https://simplysend.email/blog/setup-spf-record
 
 // 2. Create a Contact profile globally in the Contacts Directory
 // Note: Contacts must exist globally before they can be subscribed to groups.
@@ -331,6 +336,14 @@ await marketingClient.email.send({
   subscriptionGroupId: 'group_123'
 });
 ```
+
+## Domain authentication
+
+Before sending, publish the DNS records returned by `domains.create` and verify the domain in the dashboard. A domain may have only one SPF TXT record. If Google Workspace, Microsoft 365, or another provider already published SPF, merge Simply Send into that record — do not add a second `v=spf1` line.
+
+- [SPF setup guide](https://simplysend.email/docs/guide/domain-verification/spf)
+- [How to set up your SPF record correctly](https://simplysend.email/blog/setup-spf-record)
+- [Domain verification](https://simplysend.email/docs/guide/domain-verification)
 
 ## License
 
