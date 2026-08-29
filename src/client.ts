@@ -27,12 +27,19 @@ import {
   AddSubscriberResponse,
   DeleteSubscriberResponse,
   EmailTemplate,
+  ListEmailTemplatesResponse,
   ComplianceTemplate,
   ComplianceTemplateResponse,
   ListComplianceTemplatesResponse,
   DeleteComplianceTemplateResponse,
   Webhook,
   UseCase,
+  DeliverabilitySummaryQuery,
+  DeliverabilitySummaryResponse,
+  AffectedRecipientsQuery,
+  AffectedRecipientsResponse,
+  InvestigateRecipientRequest,
+  InvestigateRecipientResponse,
 } from './types';
 
 // ============================================================================
@@ -714,14 +721,14 @@ export class SimplySendWebSetupClient {
       limit?: number;
       search?: string;
       status?: string;
-      lastKey?: string;
+      cursor?: string;
     }): Promise<ListContactsResponse> => {
       const queryParams: Record<string, string> = {};
       if (query) {
         if (query.limit !== undefined) queryParams.limit = String(query.limit);
         if (query.search !== undefined) queryParams.search = query.search;
         if (query.status !== undefined) queryParams.status = query.status;
-        if (query.lastKey !== undefined) queryParams.lastKey = query.lastKey;
+        if (query.cursor !== undefined) queryParams.cursor = query.cursor;
       }
       return this.request<ListContactsResponse>('contacts', { query: queryParams });
     },
@@ -797,8 +804,11 @@ export class SimplySendWebSetupClient {
      * Lists all subscription groups.
      * @returns A promise resolving to ListSubscriptionGroupsResponse.
      */
-    listSubscriberGroups: async (): Promise<ListSubscriptionGroupsResponse> => {
-      return this.request<ListSubscriptionGroupsResponse>('contacts/subscription-groups');
+    listSubscriberGroups: async (query?: { limit?: number; cursor?: string }): Promise<ListSubscriptionGroupsResponse> => {
+      const queryParams: Record<string, string> = {};
+      if (query?.limit !== undefined) queryParams.limit = String(query.limit);
+      if (query?.cursor !== undefined) queryParams.cursor = query.cursor;
+      return this.request<ListSubscriptionGroupsResponse>('contacts/subscription-groups', { query: queryParams });
     },
 
     /**
@@ -871,7 +881,7 @@ export class SimplySendWebSetupClient {
         limit?: number;
         search?: string;
         isActive?: boolean | string;
-        lastKey?: string;
+        cursor?: string;
       }
     ): Promise<ListSubscribersResponse> => {
       if (!subscriptionGroupId) {
@@ -882,7 +892,7 @@ export class SimplySendWebSetupClient {
         if (query.limit !== undefined) queryParams.limit = String(query.limit);
         if (query.search !== undefined) queryParams.search = query.search;
         if (query.isActive !== undefined) queryParams.isActive = String(query.isActive);
-        if (query.lastKey !== undefined) queryParams.lastKey = query.lastKey;
+        if (query.cursor !== undefined) queryParams.cursor = query.cursor;
       }
       return this.request<ListSubscribersResponse>(`contacts/subscription-groups/${subscriptionGroupId}/subscriptions`, {
         query: queryParams,
@@ -993,10 +1003,16 @@ export class SimplySendWebSetupClient {
   public readonly templates = {
     /**
      * Lists all custom email templates saved under your account.
-     * @returns An array of EmailTemplate objects.
+     * @returns A paginated response containing EmailTemplate objects.
      */
-    list: async (): Promise<EmailTemplate[]> => {
-      return this.request<EmailTemplate[]>('templates');
+    list: async (query?: { type?: EmailTemplate['type']; limit?: number; cursor?: string }): Promise<ListEmailTemplatesResponse> => {
+      const queryParams: Record<string, string> = {};
+      if (query?.type) queryParams.type = query.type;
+      if (query?.limit !== undefined) queryParams.limit = String(query.limit);
+      if (query?.cursor) queryParams.cursor = query.cursor;
+      return this.request<ListEmailTemplatesResponse>('templates', {
+        ...(Object.keys(queryParams).length > 0 && { query: queryParams }),
+      });
     },
 
     /**
@@ -1115,14 +1131,15 @@ export class SimplySendWebSetupClient {
   public readonly complianceTemplates = {
     /**
      * Lists all compliance templates saved under your account.
-     * @param type Optional filter by template type.
-     * @param domain Optional filter by sending domain.
+     * @param queryInput Optional filters and pagination parameters.
      * @returns A response containing the array of compliance templates.
      */
-    list: async (type?: string, domain?: string): Promise<ListComplianceTemplatesResponse> => {
+    list: async (queryInput?: { type?: string; domain?: string; limit?: number; cursor?: string }): Promise<ListComplianceTemplatesResponse> => {
       const query: Record<string, string> = {};
-      if (type) query.type = type;
-      if (domain) query.domain = domain;
+      if (queryInput?.type) query.type = queryInput.type;
+      if (queryInput?.domain) query.domain = queryInput.domain;
+      if (queryInput?.limit !== undefined) query.limit = String(queryInput.limit);
+      if (queryInput?.cursor) query.cursor = queryInput.cursor;
       return this.request<ListComplianceTemplatesResponse>('compliance-templates', {
         ...(Object.keys(query).length > 0 && { query }),
       });
@@ -1170,6 +1187,45 @@ export class SimplySendWebSetupClient {
     delete: async (templateId: string): Promise<DeleteComplianceTemplateResponse> => {
       return this.request<DeleteComplianceTemplateResponse>(`compliance-templates/${templateId}`, {
         method: 'DELETE',
+      });
+    },
+  };
+
+  /**
+   * Read-only deliverability investigation operations. Recipient email values
+   * are sent only in the investigate POST body, never in a URL or query string.
+   */
+  public readonly deliverability = {
+    /** Get aggregate delivery event counts for a bounded time window. */
+    getSummary: async (query: DeliverabilitySummaryQuery = {}): Promise<DeliverabilitySummaryResponse> => {
+      const queryParams: Record<string, string> = {};
+      if (query.accountType) queryParams.accountType = query.accountType;
+      if (query.from) queryParams.from = query.from;
+      if (query.to) queryParams.to = query.to;
+      if (query.statuses?.length) queryParams.statuses = query.statuses.join(',');
+      return this.request<DeliverabilitySummaryResponse>('deliverability/summary', { query: queryParams });
+    },
+
+    /** List bounce, complaint, unsubscribe, or other affected recipients. */
+    listAffectedRecipients: async (query: AffectedRecipientsQuery = {}): Promise<AffectedRecipientsResponse> => {
+      const queryParams: Record<string, string> = {};
+      if (query.accountType) queryParams.accountType = query.accountType;
+      if (query.status) queryParams.status = query.status;
+      if (query.from) queryParams.from = query.from;
+      if (query.to) queryParams.to = query.to;
+      if (query.limit !== undefined) queryParams.limit = String(query.limit);
+      if (query.cursor) queryParams.cursor = query.cursor;
+      return this.request<AffectedRecipientsResponse>('deliverability/recipients', { query: queryParams });
+    },
+
+    /** Investigate one recipient's current suppression and 30-day delivery history. */
+    investigateRecipient: async (request: InvestigateRecipientRequest): Promise<InvestigateRecipientResponse> => {
+      if (!request?.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.email)) {
+        throw new SimplySendValidationError('A valid recipient email is required', 'email');
+      }
+      return this.request<InvestigateRecipientResponse>('deliverability/recipients/investigate', {
+        method: 'POST',
+        body: request,
       });
     },
   };

@@ -97,7 +97,7 @@ try {
     bcc: 'admin@example.com',                       // Optional: BCC recipient(s)
     // Note: BCC is mutually exclusive with TO and CC. Use either TO/CC or BCC, not both.
     subject: 'Welcome!',                            // UTF-8 text, max 998 chars per line
-    html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>', // Max 10MB including attachments
+    html: '<h1>Hello, World!</h1><p>Thank you for signing up.</p>', // Combined attachments: max 2MB
     text: 'Hello, World! Thank you for signing up.', // Optional: Plain text version for accessibility
     replyTo: 'support@yourverifieddomain.com',      // Optional: "Display Name <email@example.com>" or "email@example.com>"
     enableClickTracking: true,                      // Optional: Boolean for link tracking

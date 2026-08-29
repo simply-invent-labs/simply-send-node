@@ -533,7 +533,7 @@ test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
 
     global.fetch = fetchMock as any;
 
-    await client.complianceTemplates.list('unsubscribe');
+    await client.complianceTemplates.list({ type: 'unsubscribe' });
     mock.restoreAll();
   });
 
@@ -550,7 +550,7 @@ test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
 
     global.fetch = fetchMock as any;
 
-    await client.complianceTemplates.list(undefined, 'acme.com');
+    await client.complianceTemplates.list({ domain: 'acme.com' });
     mock.restoreAll();
   });
 
@@ -657,9 +657,11 @@ test('SimplySend Client Error Wrapping', async (t) => {
     const fetchMock = mock.fn(async () => {
       return new Response(
         JSON.stringify({
-          error: 'Account Suspended',
-          message: 'Your account is suspended.',
-          reasonCode: 'ACCOUNT_SUSPENDED',
+          success: false,
+          error: {
+            code: 'ACCOUNT_SUSPENDED',
+            message: 'Account Suspended',
+          },
         }),
         { status: 403 }
       );
@@ -679,6 +681,49 @@ test('SimplySend Client Error Wrapping', async (t) => {
       }
     );
 
+    mock.restoreAll();
+  });
+});
+
+test('SimplySend Web Setup Deliverability API', async (t) => {
+  await t.test('sends recipient investigation email only in the POST body', async () => {
+    const client = new SimplySendWebSetupClient({
+      accountId: 'acc_123',
+      apiKey: 'wapi_key_789',
+    });
+    const fetchMock = mock.fn(async (url: string, options: RequestInit) => {
+      assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/deliverability/recipients/investigate');
+      assert.strictEqual(options.method, 'POST');
+      assert.strictEqual(url.includes('recipient%40example.com'), false);
+      assert.deepStrictEqual(JSON.parse(String(options.body)), {
+        email: 'recipient@example.com',
+        accountType: 'transactional',
+        limit: 25,
+        cursor: 'opaque-cursor',
+      });
+      return new Response(JSON.stringify({
+        success: true,
+        data: {
+          accountType: 'transactional',
+          recipientEmail: 'recipient@example.com',
+          window: { from: '2026-07-26T00:00:00.000Z', to: '2026-08-25T00:00:00.000Z' },
+          currentSuppression: null,
+          last30Days: { sent: 0, delivered: 0, bounced: 0, complained: 0, unsubscribed: 0, suppressed: 0, other: 0 },
+          messages: [],
+          nextCursor: null,
+        },
+      }), { status: 200 });
+    });
+    global.fetch = fetchMock as any;
+
+    const response = await client.deliverability.investigateRecipient({
+      email: 'recipient@example.com',
+      accountType: 'transactional',
+      limit: 25,
+      cursor: 'opaque-cursor',
+    });
+
+    assert.strictEqual(response.data.recipientEmail, 'recipient@example.com');
     mock.restoreAll();
   });
 });

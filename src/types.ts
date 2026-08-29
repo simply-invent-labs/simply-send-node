@@ -582,7 +582,7 @@ export interface ListContactsResponse {
   data: {
     contacts: Contact[];
     count: number;
-    nextKey?: string;
+    nextCursor?: string | null;
   };
 }
 
@@ -618,7 +618,7 @@ export interface ListSubscriptionGroupsResponse {
   data: {
     groups: SubscriptionGroup[];
     count: number;
-    nextKey?: string;
+    nextCursor?: string | null;
   };
 }
 
@@ -676,7 +676,7 @@ export interface ListSubscribersResponse {
   data: {
     subscribers: SubscriberResponse[];
     count: number;
-    nextKey?: string;
+    nextCursor?: string | null;
   };
 }
 
@@ -703,6 +703,108 @@ export interface DeleteSubscriberResponse {
   success: boolean;
   data: {
     message: string;
+  };
+}
+
+// -------------------------------------------------------------
+// Deliverability Investigation API Types
+// -------------------------------------------------------------
+
+export type DeliverabilityAccountType = 'transactional' | 'marketing';
+
+export interface DeliverabilitySummaryQuery {
+  accountType?: DeliverabilityAccountType;
+  from?: string;
+  to?: string;
+  statuses?: string[];
+}
+
+export interface DeliverabilitySummaryResponse {
+  success: boolean;
+  data: {
+    accountType: DeliverabilityAccountType;
+    from: string;
+    to: string;
+    counts: Record<string, number>;
+    generatedAt: string;
+  };
+}
+
+export interface AffectedRecipientsQuery {
+  accountType?: DeliverabilityAccountType;
+  status?: 'bounce' | 'complaint' | 'unsubscribe' | 'other';
+  from?: string;
+  to?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface DeliverabilityEvent {
+  emailId?: string;
+  recipientEmail?: string | null;
+  timestamp: string;
+  status: string;
+  deliveryStatus?: string | null;
+  messageId?: string | null;
+  campaignId?: string | null;
+  bounceType?: string | null;
+  bounceSubType?: string | null;
+  diagnosticCode?: string | null;
+  complaintFeedbackType?: string | null;
+  suppressionReason?: string | null;
+}
+
+export interface AffectedRecipientsResponse {
+  success: boolean;
+  data: {
+    accountType: DeliverabilityAccountType;
+    status: string;
+    from: string;
+    to: string;
+    recipients: DeliverabilityEvent[];
+    nextCursor: string | null;
+  };
+}
+
+export interface InvestigateRecipientRequest {
+  /** Recipient email sent in the POST body; it is never included in the URL. */
+  email: string;
+  accountType?: DeliverabilityAccountType;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface InvestigateRecipientResponse {
+  success: boolean;
+  data: {
+    accountType: DeliverabilityAccountType;
+    recipientEmail: string;
+    window: { from: string; to: string };
+    currentSuppression: {
+      reason: string | null;
+      bounceType: string | null;
+      complaintFeedbackType: string | null;
+      updatedAt: string | number | null;
+    } | null;
+    last30Days: {
+      sent: number;
+      delivered: number;
+      bounced: number;
+      complained: number;
+      unsubscribed: number;
+      suppressed: number;
+      other: number;
+    };
+    messages: Array<{
+      emailId?: string;
+      timestamp: string;
+      status: string;
+      messageId?: string | null;
+      campaignId?: string | null;
+      deliveredAt?: string | null;
+      errorMessage?: string | null;
+    }>;
+    nextCursor: string | null;
   };
 }
 
@@ -754,6 +856,16 @@ export interface EmailTemplate {
      */
     required: boolean;
   }>;
+}
+
+/** Response returned when listing email templates. */
+export interface ListEmailTemplatesResponse {
+  success: boolean;
+  data: {
+    templates: EmailTemplate[];
+    count: number;
+    nextCursor?: string | null;
+  };
 }
 
 /**
@@ -828,6 +940,8 @@ export interface ListComplianceTemplatesResponse {
   success: boolean;
   data: {
     templates: ComplianceTemplate[];
+    count: number;
+    nextCursor?: string | null;
   };
 }
 

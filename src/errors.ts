@@ -26,7 +26,8 @@ export class SimplySendValidationError extends SimplySendError {
  * Error structure returned by SimplySend API.
  */
 export interface SimplySendApiErrorResponse {
-  error: string | {
+  success?: false;
+  error?: string | {
     code?: string;
     message?: string;
     details?: Array<{ field: string; message: string }>;
@@ -58,6 +59,6 @@ export class SimplySendHttpError extends SimplySendError {
     this.name = 'SimplySendHttpError';
     this.statusCode = statusCode;
     this.body = body;
-    this.reasonCode = body.reasonCode;
+    this.reasonCode = body.reasonCode || (typeof body.error === 'object' ? body.error.code : undefined);
   }
 }
