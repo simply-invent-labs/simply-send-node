@@ -369,6 +369,24 @@ test('SimplySendWebSetupClient', async (t) => {
     assert.deepStrictEqual(res, []);
     mock.restoreAll();
   });
+
+  await t.test('should use the documented verbs for domain creation and feature configuration', async () => {
+    const client = new SimplySendWebSetupClient({ accountId: 'acc_123', apiKey: 'wapi_key_789' });
+    const calls: Array<{ url: string; method: string }> = [];
+    global.fetch = mock.fn(async (url: any, options: any) => {
+      calls.push({ url: String(url), method: options.method });
+      return new Response(JSON.stringify({ success: true, data: { message: 'ok', verified: true, dnsMatchesLive: true } }), { status: 200 });
+    }) as any;
+
+    await client.domains.create({ domain: 'example.com' });
+    await client.domains.configureClickTracking('domain_123', true);
+    await client.domains.verifyClickTracking('domain_123');
+    await client.domains.configureInboundEmail('domain_123', { enabled: true, inboxSubdomain: 'inbound' });
+    await client.domains.verifyInboundEmail('domain_123');
+
+    assert.deepStrictEqual(calls.map(({ method }) => method), ['POST', 'PATCH', 'POST', 'PATCH', 'POST']);
+    mock.restoreAll();
+  });
 });
 
 // ============================================================================
@@ -431,10 +449,10 @@ test('SimplySendWebSetupClient Contacts & Subscribers API', async (t) => {
     mock.restoreAll();
   });
 
-  await t.test('contacts.updateContact() should invoke PUT /web-setup/contacts/{contactIdentifier}', async () => {
+  await t.test('contacts.updateContact() should invoke PATCH /web-setup/contacts/{contactIdentifier}', async () => {
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/contacts/email_4832981775432a1383848b8137350438');
-      assert.strictEqual(options.method, 'PUT');
+      assert.strictEqual(options.method, 'PATCH');
       const body = JSON.parse(options.body);
       assert.strictEqual(body.firstName, 'John');
       return new Response(JSON.stringify({ success: true, data: { contact: { email: 'user@test.com', firstName: 'John' } } }), { status: 200 });
@@ -596,7 +614,7 @@ test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
     mock.restoreAll();
   });
 
-  await t.test('complianceTemplates.update() should invoke PUT /web-setup/compliance-templates/{id}', async () => {
+  await t.test('complianceTemplates.update() should invoke PATCH /web-setup/compliance-templates/{id}', async () => {
     const client = new SimplySendWebSetupClient({
       accountId: 'acc_123',
       apiKey: 'wapi_key_789',
@@ -604,7 +622,7 @@ test('SimplySendWebSetupClient Compliance Templates API', async (t) => {
 
     const fetchMock = mock.fn(async (url: any, options: any) => {
       assert.strictEqual(url, 'https://wapi.simplysend.email/web-setup/compliance-templates/compliance_123');
-      assert.strictEqual(options.method, 'PUT');
+      assert.strictEqual(options.method, 'PATCH');
 
       return new Response(
         JSON.stringify({ success: true, data: { template: { templateId: 'compliance_123', name: 'Updated' } } }),

@@ -482,6 +482,29 @@ export interface DnsRecord {
   priority?: number;
 }
 
+/** Standard response returned when a domain feature is configured. */
+export interface DomainFeatureConfigurationResponse {
+  success: boolean;
+  data: {
+    clickTrackingEnabled?: boolean;
+    inboxEnabled?: boolean;
+    inboxSubdomain?: string;
+    inboxVerified?: boolean;
+    message: string;
+  };
+}
+
+/** Standard response returned after checking a domain feature's DNS record. */
+export interface DomainFeatureVerificationResponse {
+  success: boolean;
+  data: {
+    feature: string;
+    verified: boolean;
+    dnsMatchesLive: boolean;
+    message: string;
+  };
+}
+
 /**
  * Represents a subscription list or contact group.
  */

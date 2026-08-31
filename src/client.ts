@@ -10,6 +10,8 @@ import {
   DomainGroup,
   Domain,
   DnsRecord,
+  DomainFeatureConfigurationResponse,
+  DomainFeatureVerificationResponse,
   SubscriptionGroup,
   Contact,
   SubscriberRequest,
@@ -584,7 +586,7 @@ export class SimplySendWebSetupClient {
      */
     create: async (domain: Domain): Promise<Domain> => {
       return this.request<Domain>('domains', {
-        method: 'PUT',
+        method: 'POST',
         body: domain,
       });
     },
@@ -616,6 +618,44 @@ export class SimplySendWebSetupClient {
      */
     verify: async (domainId: string): Promise<{ success: boolean; message: string }> => {
       return this.request<{ success: boolean; message: string }>(`domains/${domainId}/verify`, {
+        method: 'POST',
+      });
+    },
+
+    /** Lists the available domain setup use cases. */
+    getUseCases: async (): Promise<{ success: boolean; data: { useCases: UseCase[]; message: string } }> => {
+      return this.request<{ success: boolean; data: { useCases: UseCase[]; message: string } }>('use-cases');
+    },
+
+    /** Enables or disables custom-domain click tracking. */
+    configureClickTracking: async (domainId: string, enabled: boolean): Promise<DomainFeatureConfigurationResponse> => {
+      return this.request<DomainFeatureConfigurationResponse>(`domains/${domainId}/features/click-tracking`, {
+        method: 'PATCH',
+        body: { enabled },
+      });
+    },
+
+    /** Checks the click-tracking DNS record and updates its verification state. */
+    verifyClickTracking: async (domainId: string): Promise<DomainFeatureVerificationResponse> => {
+      return this.request<DomainFeatureVerificationResponse>(`domains/${domainId}/features/click-tracking/verify`, {
+        method: 'POST',
+      });
+    },
+
+    /** Enables or disables inbound email for a domain. */
+    configureInboundEmail: async (
+      domainId: string,
+      options: { enabled: boolean; inboxSubdomain?: string },
+    ): Promise<DomainFeatureConfigurationResponse> => {
+      return this.request<DomainFeatureConfigurationResponse>(`domains/${domainId}/features/inbound-email`, {
+        method: 'PATCH',
+        body: options,
+      });
+    },
+
+    /** Checks the inbound-email MX record and updates its verification state. */
+    verifyInboundEmail: async (domainId: string): Promise<DomainFeatureVerificationResponse> => {
+      return this.request<DomainFeatureVerificationResponse>(`domains/${domainId}/features/inbound-email/verify`, {
         method: 'POST',
       });
     },
@@ -687,7 +727,7 @@ export class SimplySendWebSetupClient {
      */
     update: async (groupId: string, group: DomainGroup): Promise<DomainGroup> => {
       return this.request<DomainGroup>(`domain-groups/${groupId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: group,
       });
     },
@@ -777,7 +817,7 @@ export class SimplySendWebSetupClient {
         throw new SimplySendValidationError('Contact identifier must be a secure hashed value (e.g. \'email_md5\' or \'phone_md5\')', 'contactIdentifier');
       }
       return this.request<UpsertContactResponse>(`contacts/${encodeURIComponent(contactIdentifier)}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: contact,
       });
     },
@@ -849,7 +889,7 @@ export class SimplySendWebSetupClient {
         throw new SimplySendValidationError('Subscription Group ID (subscriptionGroupId) is required', 'subscriptionGroupId');
       }
       return this.request<UpdateSubscriptionGroupResponse>(`contacts/subscription-groups/${subscriptionGroupId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: group,
       });
     },
@@ -1044,7 +1084,7 @@ export class SimplySendWebSetupClient {
      */
     update: async (templateId: string, template: EmailTemplate): Promise<EmailTemplate> => {
       return this.request<EmailTemplate>(`templates/${templateId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: template,
       });
     },
@@ -1105,7 +1145,7 @@ export class SimplySendWebSetupClient {
      */
     update: async (webhookId: string, webhook: Webhook): Promise<Webhook> => {
       return this.request<Webhook>(`webhooks/${webhookId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: webhook,
       });
     },
@@ -1174,7 +1214,7 @@ export class SimplySendWebSetupClient {
      */
     update: async (templateId: string, template: ComplianceTemplate): Promise<ComplianceTemplateResponse> => {
       return this.request<ComplianceTemplateResponse>(`compliance-templates/${templateId}`, {
-        method: 'PUT',
+        method: 'PATCH',
         body: template,
       });
     },

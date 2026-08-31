@@ -32,6 +32,47 @@ npm install simplysend
 
 ---
 
+## What's New in v6
+
+v6 aligns the Web Setup SDK with the current WAPI contract and adds typed helpers for domain features.
+
+- Create domains with `POST`.
+- Partially update domain groups, contacts, subscription groups, templates, compliance templates, and webhooks with `PATCH`.
+- Configure and verify click tracking and inbound email with `client.domains` helpers.
+
+### Migrating from v5
+
+This is a breaking WAPI change. Upgrade the SDK and deploy the corresponding Web Setup API changes together:
+
+```bash
+npm install simplysend@^6.0.0
+```
+
+If you call WAPI directly rather than through this SDK, update the following request methods:
+
+| Operation | v5 and earlier | v6 |
+| --- | --- | --- |
+| Create domain | `PUT /web-setup/domains` | `POST /web-setup/domains` |
+| Update a domain group | `PUT` | `PATCH` |
+| Update a contact | `PUT` | `PATCH` |
+| Update a subscription group or subscription | `PUT` | `PATCH` |
+| Update a template, compliance template, or webhook | `PUT` | `PATCH` |
+
+The existing SDK method names are unchanged. Update the package version; the SDK sends the correct v6 method automatically.
+
+```typescript
+await client.domains.configureClickTracking(domainId, true);
+await client.domains.verifyClickTracking(domainId);
+
+await client.domains.configureInboundEmail(domainId, {
+  enabled: true,
+  inboxSubdomain: 'inbound',
+});
+await client.domains.verifyInboundEmail(domainId);
+```
+
+---
+
 ## Client Initialization
 
 To connect to SimplySend, you will initialize the specialized client class corresponding to the API features you need. Each constructor requires your **Account ID** and the respective **API Key** (retrieved from the **Settings** page in your SimplySend Dashboard).
@@ -167,6 +208,20 @@ console.log('Verification records:', newDomain.dnsRecords);
 // into that record — do not add a second v=spf1 TXT.
 // https://simplysend.email/docs/guide/domain-verification/spf
 // https://simplysend.email/blog/setup-spf-record
+
+// Optional domain features are configured through the Web Setup API:
+// PATCH /web-setup/domains/{domainId}/features/click-tracking
+// PATCH /web-setup/domains/{domainId}/features/inbound-email
+// POST  /web-setup/domains/{domainId}/features/{feature}/verify
+// Each operation has its own API reference page. See:
+// https://simplysend.email/docs/api/domains/click-tracking/configure
+// https://simplysend.email/docs/api/domains/click-tracking/verify
+// https://simplysend.email/docs/api/domains/inbound-email/configure
+// https://simplysend.email/docs/api/domains/inbound-email/verify
+
+// Update a domain group:
+// PATCH /web-setup/domain-groups/{groupId}
+// https://simplysend.email/docs/api/domain-groups/update
 
 // 2. Create a Contact profile globally in the Contacts Directory
 // Note: Contacts must exist globally before they can be subscribed to groups.
